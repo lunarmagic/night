@@ -1,0 +1,6 @@
+[submodule "night/vendor/spdlog"]
+	path = night/vendor/spdlog
+	url = https://github.com/gabime/spdlog
+[submodule "night/vendor/sdl3"]
+	path = night/vendor/sdl3
+	url = https://github.com/libsdl-org/SDL

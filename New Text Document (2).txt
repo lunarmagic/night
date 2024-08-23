@@ -1,0 +1,138 @@
+1: create github repo
+
+2: create vs solution (with project called *Engine*)
+
+3: with git installed: type cmd into the windows explorer within the solution folder,
+then in the cmd line type: git clone *url to github repo*
+
+4: move the .git from the project file into the solution dir
+
+5: remove 32bit from the project
+
+6: under all configurations, general: change Configuration Type from .exe to .dll
+
+7: under all configurations, general: set output directory to $(SolutionDir)bin\$(Configuration)-$(Platform)\$(ProjectName)\
+
+8: under all configurations, general: set intermediate directory to $(SolutionDir)bin-int\$(Configuration)-$(Platform)\$(ProjectName)\
+(change bin to bin-int)
+
+9: right-click solution and add a new project titled "Sandbox"
+
+10: remove 32bit from "Sandbox"
+
+11: copy and paste output and intermediate directories from *Engine* into "Sandbox", configuration type is default .exe
+
+12: set "Sandbox" to startup project
+
+13: close solution and open the solution file as text (in vscode),
+swap "Sandbox" and the *Engine* so "Sandbox" is the default.
+
+14: right click "Sandbox" and add *Engine* as a reference.
+
+15: set both projects to show all files, create "src" folders in both projects
+
+part 2:
+
+1: create a folder in *Engine* called *Engine*
+
+2: in *Engine*\*Engine*: create Core.h
+
+3: in *Engine*\*Engine*: create Application class (within *Engine* namespace).
+
+4: add "run" function, constructor and virtual destructor to Application.
+
+5: in core:
+#ifdef *Engine*_PLATFORM_WINDOWS
+	#ifdef *Engine*_BUILD_DLL
+		#define *Engine*_API __declspec(dllexport)
+	#else
+		#define *Engine*_API __declspec(dllimport)
+	#endif
+#else
+	#error *Engine* ONLY SUPPORTS WINDOWS
+#endif
+
+6: in *Engine* properties, c/c++, preprocessor: preprocessor definitions: add *Engine*_PLATFORM_WINDOWS;*Engine*_BUILD_DLL;
+7: in "Sandbox" properties, c/c++, preprocessor: preprocessor definitions: add *Engine*_PLATFORM_WINDOWS;
+
+8: add *Engine*_API to application class between class and definition.
+
+8.5: create *Engine*.h in src folder.
+
+9: add $(SolutionDir)*Engine*\src to sandbox additional include directories.
+
+10: create main.cpp in sandbox.
+
+11: create subclass of Application.
+
+12: create entry.h in *Engine*:
+#pragma once
+
+#ifdef *Engine*_PLATFORM_WINDOWS
+
+extern *Engine*::Application* *Engine*::create_application();
+
+int main(int argc, char** argv)
+{
+	auto app = *Engine*::create_application();
+	app->run();
+	delete app;
+}
+#endif
+
+13: add create_application to Application.h
+
+14: define create_application in sandbox/main.cpp
+return the subclass.
+
+part 3 push to github:
+1 open sol dir, open cmd:
+2 type git status
+
+3 add .gitignore to solution dir:
+
+# Directories
+.vs/
+bin/
+bin-int/
+
+# Files
+*.user
+
+4 git add *
+
+5 git status
+
+"git reset" to reset
+
+6 git commit -m "*git title*"
+
+7 git push origin master
+
+8 git push
+
+
+ADD SUBMODULES:
+in cmd prompt: git submodule add *url to submodule*
+add $(SolutionDir)night\vendor\*module include*; to *Engine* and sandbox includes.
+
+
+PREMAKE:
+1: create vendor/bin/premake folder in sol dir.
+2: put premake.exe in the folder.
+3: write premake file
+4: delete bin and bin-int
+5: create bat file
+6: run bat file
+
+precompiled headers:
+1: create pch header and cpp files.
+2: add 	
+	pchheader "nightpch.h"
+	pchsource "night/src/nightpch.cpp"
+   to the premake lua file
+
+3: in lua file, add include "%{prj.name}/src" into *Engine*
+4: include pch in all cpp files
+
+ADD SDL:
