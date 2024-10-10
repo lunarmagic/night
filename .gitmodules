@@ -4,3 +4,7 @@
 [submodule "night/vendor/sdl3"]
 	path = night/vendor/sdl3
 	url = https://github.com/libsdl-org/SDL
+[submodule "night/vendor/imgui"]
+	path = night/vendor/imgui
+	url = https://github.com/ocornut/imgui
+	branch = docking

@@ -1,21 +1,9 @@
 
-#include <night.h>
-
-class Sandbox : public night::Application
-{
-public:
-	Sandbox() {};
-	~Sandbox() {};
-};
+#include "nightpch.h"
+#include "Sandbox/Sandbox.h"
+#include "application/Application.h"
 
 night::Application* night::create_application()
 {
-	return new Sandbox;
+	return new night::Sandbox();
 }
-
-//int main()
-//{
-//	Sandbox* app = new Sandbox;
-//	app->run();
-//	delete app;
-//}

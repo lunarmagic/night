@@ -1,22 +1,149 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    <Filter Include="ComputeShader">
+      <UniqueIdentifier>{D915146C-45D6-8FA2-0E11-D91F7A90D47E}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    <Filter Include="Drawing">
+      <UniqueIdentifier>{912F4287-FD0E-C122-0627-4CF972852784}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    <Filter Include="KDTree">
+      <UniqueIdentifier>{6470D0BB-5012-FB91-39CD-0EE6250E82E2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Polygon">
+      <UniqueIdentifier>{ADACC51C-198C-44B8-22A4-CF8E8E02AB19}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Renderer3D">
+      <UniqueIdentifier>{53641300-3F1C-554D-A823-2EA994FAEF3D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sandbox">
+      <UniqueIdentifier>{F4C124E3-60A1-A37E-69B9-2E55D5170AE0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="algorithm">
+      <UniqueIdentifier>{ECB2EEC4-581D-A33B-A15B-54E10D058190}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="form">
+      <UniqueIdentifier>{79E5967C-651C-980D-0E09-7E10FA1E140F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="gamemode">
+      <UniqueIdentifier>{E497A4BA-D064-FFC5-F97D-ED6DE5A93454}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="points">
+      <UniqueIdentifier>{42E23415-2E84-5FEB-173F-733F0380E63B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="text">
+      <UniqueIdentifier>{0A699E7C-F69F-9F0D-9F8C-85108BA21B0F}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\main.cpp">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="src\ComputeShader\ComputeShader.h">
+      <Filter>ComputeShader</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Drawing\BoxDrawing.h">
+      <Filter>Drawing</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Drawing\Canvas.h">
+      <Filter>Drawing</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Drawing\Line.h">
+      <Filter>Drawing</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Drawing\temp.h">
+      <Filter>Drawing</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Polygon\Polygon.h">
+      <Filter>Polygon</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Polygon\Polygon3D.h">
+      <Filter>Polygon</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Renderer3D\Renderer3D.h">
+      <Filter>Renderer3D</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Sandbox\Sandbox.h">
+      <Filter>Sandbox</Filter>
+    </ClInclude>
+    <ClInclude Include="src\algorithm\algorithm.h">
+      <Filter>algorithm</Filter>
+    </ClInclude>
+    <ClInclude Include="src\form\Box.h">
+      <Filter>form</Filter>
+    </ClInclude>
+    <ClInclude Include="src\form\IForm.h">
+      <Filter>form</Filter>
+    </ClInclude>
+    <ClInclude Include="src\form\Intersection.h">
+      <Filter>form</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gamemode\CameraGameMode.h">
+      <Filter>gamemode</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gamemode\FormIntersectionsMode.h">
+      <Filter>gamemode</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gamemode\FreeformBoxesMode.h">
+      <Filter>gamemode</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gamemode\IGameMode.h">
+      <Filter>gamemode</Filter>
+    </ClInclude>
+    <ClInclude Include="src\points\Points.h">
+      <Filter>points</Filter>
+    </ClInclude>
+    <ClInclude Include="src\text\Text.h">
+      <Filter>text</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\ComputeShader\ComputeShader.cpp">
+      <Filter>ComputeShader</Filter>
     </ClCompile>
+    <ClCompile Include="src\Drawing\BoxDrawing.cpp">
+      <Filter>Drawing</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Drawing\Canvas.cpp">
+      <Filter>Drawing</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Polygon\Polygon.cpp">
+      <Filter>Polygon</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Polygon\Polygon3D.cpp">
+      <Filter>Polygon</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Renderer3D\Renderer3D.cpp">
+      <Filter>Renderer3D</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Sandbox\Sandbox.cpp">
+      <Filter>Sandbox</Filter>
+    </ClCompile>
+    <ClCompile Include="src\algorithm\algorithm.cpp">
+      <Filter>algorithm</Filter>
+    </ClCompile>
+    <ClCompile Include="src\form\Box.cpp">
+      <Filter>form</Filter>
+    </ClCompile>
+    <ClCompile Include="src\form\IForm.cpp">
+      <Filter>form</Filter>
+    </ClCompile>
+    <ClCompile Include="src\form\Intersection.cpp">
+      <Filter>form</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gamemode\CameraGameMode.cpp">
+      <Filter>gamemode</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gamemode\FormIntersectionsMode.cpp">
+      <Filter>gamemode</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gamemode\FreeformBoxesMode.cpp">
+      <Filter>gamemode</Filter>
+    </ClCompile>
+    <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\points\Points.cpp">
+      <Filter>points</Filter>
+    </ClCompile>
+    <ClCompile Include="src\text\Text.cpp">
+      <Filter>text</Filter>
+    </ClCompile>
+    <ClCompile Include="src\utility.cpp" />
   </ItemGroup>
 </Project>

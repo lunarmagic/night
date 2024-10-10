@@ -1,33 +1,175 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="night">
-      <UniqueIdentifier>{5FDF0010-CBF3-28C1-9475-CC20004925F2}</UniqueIdentifier>
+    <Filter Include="aabb">
+      <UniqueIdentifier>{EBE9937C-D720-950D-800D-7B106C23110F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="application">
+      <UniqueIdentifier>{F9860F5B-653C-8850-EE30-82275AE57E54}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="color">
+      <UniqueIdentifier>{44323D0F-B046-65C0-79C8-0820E59B61F1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="event">
+      <UniqueIdentifier>{071C650F-7330-8DC0-3CB2-3020A88589F1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="geometry">
+      <UniqueIdentifier>{5154C4F3-3D21-1FFF-663A-0DA75266548D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="input">
+      <UniqueIdentifier>{B54AA90F-215F-D1C0-EAE0-742056B4CDF1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="log">
+      <UniqueIdentifier>{078D880B-7396-887C-FC11-9F7C681A947C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="math">
+      <UniqueIdentifier>{CF809A7C-BBB7-9B0D-64A4-811050BA170F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="node">
+      <UniqueIdentifier>{AB469B7C-977D-9C0D-406A-82102C80180F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="renderer">
+      <UniqueIdentifier>{9C6AA017-8837-FB22-B150-E9CA9D7C30B1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="renderer\backends">
+      <UniqueIdentifier>{4694BD6F-B2AA-BB05-FB21-472767778C8D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="renderer\backends\sdl">
+      <UniqueIdentifier>{98037681-0470-317C-CD63-C9D9398F53E4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="texture">
+      <UniqueIdentifier>{964579D9-0225-F874-0B3D-834B779B5ED6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="window">
+      <UniqueIdentifier>{5DFE1E25-49A0-49FB-325B-5D4F1E9CD04B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="window\backends">
+      <UniqueIdentifier>{27F148A8-937C-B66C-9C8D-39610898126D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="window\backends\sdl">
+      <UniqueIdentifier>{F9E83698-654A-14A6-EEB7-5A585A184B65}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\night.h" />
-    <ClInclude Include="src\night\Application.h">
-      <Filter>night</Filter>
+    <ClInclude Include="src\aabb\AABB.h">
+      <Filter>aabb</Filter>
     </ClInclude>
-    <ClInclude Include="src\night\Log.h">
-      <Filter>night</Filter>
+    <ClInclude Include="src\application\Application.h">
+      <Filter>application</Filter>
     </ClInclude>
-    <ClInclude Include="src\night\core.h">
-      <Filter>night</Filter>
+    <ClInclude Include="src\color\Color.h">
+      <Filter>color</Filter>
     </ClInclude>
-    <ClInclude Include="src\night\entry.h">
-      <Filter>night</Filter>
+    <ClInclude Include="src\common.h" />
+    <ClInclude Include="src\core.h" />
+    <ClInclude Include="src\entry.h" />
+    <ClInclude Include="src\event\ApplicationEvent.h">
+      <Filter>event</Filter>
+    </ClInclude>
+    <ClInclude Include="src\event\Event.h">
+      <Filter>event</Filter>
+    </ClInclude>
+    <ClInclude Include="src\event\KeyEvent.h">
+      <Filter>event</Filter>
+    </ClInclude>
+    <ClInclude Include="src\event\MouseEvent.h">
+      <Filter>event</Filter>
+    </ClInclude>
+    <ClInclude Include="src\geometry\Quad.h">
+      <Filter>geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="src\geometry\Vertex.h">
+      <Filter>geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="src\input\EInput.h">
+      <Filter>input</Filter>
+    </ClInclude>
+    <ClInclude Include="src\input\InputKey.h">
+      <Filter>input</Filter>
+    </ClInclude>
+    <ClInclude Include="src\log\log.h">
+      <Filter>log</Filter>
+    </ClInclude>
+    <ClInclude Include="src\math\math.h">
+      <Filter>math</Filter>
     </ClInclude>
     <ClInclude Include="src\nightpch.h" />
+    <ClInclude Include="src\node\INode.h">
+      <Filter>node</Filter>
+    </ClInclude>
+    <ClInclude Include="src\node\Node2D.h">
+      <Filter>node</Filter>
+    </ClInclude>
+    <ClInclude Include="src\node\Node3D.h">
+      <Filter>node</Filter>
+    </ClInclude>
+    <ClInclude Include="src\renderer\IRenderer.h">
+      <Filter>renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\renderer\backends\sdl\RendererSDL.h">
+      <Filter>renderer\backends\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="src\texture\ISurface.h">
+      <Filter>texture</Filter>
+    </ClInclude>
+    <ClInclude Include="src\texture\ITexture.h">
+      <Filter>texture</Filter>
+    </ClInclude>
+    <ClInclude Include="src\utility.h" />
+    <ClInclude Include="src\window\IWindow.h">
+      <Filter>window</Filter>
+    </ClInclude>
+    <ClInclude Include="src\window\backends\sdl\WindowSDL.h">
+      <Filter>window\backends\sdl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\night\Application.cpp">
-      <Filter>night</Filter>
+    <ClCompile Include="src\aabb\AABB.cpp">
+      <Filter>aabb</Filter>
     </ClCompile>
-    <ClCompile Include="src\night\Log.cpp">
-      <Filter>night</Filter>
+    <ClCompile Include="src\application\Application.cpp">
+      <Filter>application</Filter>
+    </ClCompile>
+    <ClCompile Include="src\color\Color.cpp">
+      <Filter>color</Filter>
+    </ClCompile>
+    <ClCompile Include="src\geometry\Quad.cpp">
+      <Filter>geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="src\log\log.cpp">
+      <Filter>log</Filter>
+    </ClCompile>
+    <ClCompile Include="src\math\math.cpp">
+      <Filter>math</Filter>
     </ClCompile>
     <ClCompile Include="src\nightpch.cpp" />
+    <ClCompile Include="src\node\INode.cpp">
+      <Filter>node</Filter>
+    </ClCompile>
+    <ClCompile Include="src\node\Node2D.cpp">
+      <Filter>node</Filter>
+    </ClCompile>
+    <ClCompile Include="src\node\Node3D.cpp">
+      <Filter>node</Filter>
+    </ClCompile>
+    <ClCompile Include="src\renderer\IRenderer.cpp">
+      <Filter>renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\renderer\backends\sdl\RendererSDL.cpp">
+      <Filter>renderer\backends\sdl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\texture\ISurface.cpp">
+      <Filter>texture</Filter>
+    </ClCompile>
+    <ClCompile Include="src\texture\ITexture.cpp">
+      <Filter>texture</Filter>
+    </ClCompile>
+    <ClCompile Include="src\utility.cpp" />
+    <ClCompile Include="src\window\IWindow.cpp">
+      <Filter>window</Filter>
+    </ClCompile>
+    <ClCompile Include="src\window\backends\sdl\WindowSDL.cpp">
+      <Filter>window\backends\sdl</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

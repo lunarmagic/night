@@ -1,6 +1,8 @@
 
+-- TODO: change dialect to c++ 20 and define NIGHT_ENABLE_ASSERT
+
 workspace "night"
-	architecture "x86"
+	architecture "x64"
 
 	configurations
 	{
@@ -12,15 +14,18 @@ workspace "night"
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
 IncludeDir = {}
-IncludeDir["SDL3"] = "night/vendor/sdl3/include"
+IncludeDir["SDL2"] = "$(SolutionDir)/night/vendor/sdl2/include"
+IncludeDir["SDL2_image"] = "$(SolutionDir)/night/vendor/SDL2_image/include"
 
 LibDir = {}
-LibDir["SDL3"] = "%{prj.name}/vendor/sdl3/VisualC/Win32/Release"
+LibDir["SDL2"] = "$(SolutionDir)/night/vendor/SDL2/lib/x64"
+LibDir["SDL2_image"] = "$(SolutionDir)/night/vendor/SDL2_image/lib/x64"
 
 project "night"
 	location "night"
-	kind "SharedLib"
+	kind "SharedLib" -- TODO: add static library macro
 	language "C++"
+	cppdialect "C++20"
 
 	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
@@ -37,34 +42,34 @@ project "night"
 	includedirs
 	{
 		"%{prj.name}/src",
-		"%{prj.name}/vendor/spdlog/include",
-		"%{IncludeDir.SDL3}"
+		--"%{prj.name}/vendor/spdlog/include",
+		"%{prj.name}/vendor/glm",
+		"%{IncludeDir.SDL2}",
+		"%{IncludeDir.SDL2_image}"
 	}
 
 	libdirs 
 	{
-		"%{LibDir.SDL3}"
+		"%{LibDir.SDL2}",
+		"%{LibDir.SDL2_image}"
 	}
 
 	links
 	{
-		"SDL3.lib",
-		"winmm.lib",
-		"version.lib",
-		"Imm32.lib",
-		"Setupapi.lib",
-		"libcmt.lib",
-		"libucrtd.lib"
+		"SDL2.lib",
+		"SDL2main.lib",
+		"SDL2_image.lib"
 	}
 
 	filter "system:windows"
-		cppdialect "C++17"
-		staticruntime "On"
+		cppdialect "C++20"
+		--staticruntime "On"
 		systemversion "latest"
 
 		defines
 		{
 			"NIGHT_PLATFORM_WINDOWS",
+			"NIGHT_USE_DOUBLE_PRECISION",
 			"NIGHT_BUILD_DLL"
 		}
 
@@ -74,21 +79,36 @@ project "night"
 		}
 
 		filter "configurations:Debug"
-			defines "NIGHT_DEBUG"
+			defines 
+			{ 
+				"NIGHT_DEBUG",
+				"NIGHT_ENABLE_LOGGING",
+				"NIGHT_CORE"
+			}
 			symbols "On"
 
 		filter "configurations:Release"
-			defines "NIGHT_RELEASE"
+			defines 
+			{
+				"NIGHT_RELEASE",
+				"NIGHT_ENABLE_LOGGING",
+				"NIGHT_CORE"
+			}
 			optimize "On"
 
 		filter "configurations:Dist"
-			defines "NIGHT_DIST"
+			defines 
+			{
+				"NIGHT_DIST",
+				"NIGHT_CORE"
+			}
 			optimize "On"
 
 project "sandbox"
 	location "sandbox"
 	kind "ConsoleApp"
 	language "C++"
+	cppdialect "C++20"
 
 	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
@@ -101,31 +121,53 @@ project "sandbox"
 
 	includedirs
 	{
-		"night/vendor/spdlog/include",
-		"night/src"
+		--"night/vendor/spdlog/include",
+		"%{prj.name}/src",
+		"night/vendor/glm",
+		"night/src",
+		"%{IncludeDir.SDL2}", --TODO: fix this
+		"%{IncludeDir.SDL2_image}" --TODO: fix this
+	}
+
+	libdirs 
+	{
+		"%{LibDir.SDL2}",
+		"%{LibDir.SDL2_image}"
 	}
 
 	links
 	{
+		"SDL2.lib",
+		"SDL2main.lib",
+		"SDL2_image.lib",
 		"night"
 	}
 
 	filter "system:windows"
-		cppdialect "C++17"
-		staticruntime "On"
+		cppdialect "C++20"
+		--staticruntime "On"
 		systemversion "latest"
 
 		defines
 		{
 			"NIGHT_PLATFORM_WINDOWS",
+			"NIGHT_USE_DOUBLE_PRECISION"
 		}
 
 		filter "configurations:Debug"
-			defines "NIGHT_DEBUG"
+			defines
+			{
+				"NIGHT_DEBUG",
+				"NIGHT_ENABLE_LOGGING"
+			}
 			symbols "On"
 
 		filter "configurations:Release"
-			defines "NIGHT_RELEASE"
+			defines 
+			{
+				"NIGHT_RELEASE",
+				"NIGHT_ENABLE_LOGGING"
+			}
 			optimize "On"
 
 		filter "configurations:Dist"
