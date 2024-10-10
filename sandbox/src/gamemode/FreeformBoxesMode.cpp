@@ -37,7 +37,7 @@ namespace night
 		_shouldEvaluateFarCorners = params.should_evaluate_far_corners;
 		_boxDrawingRasterizationResolution = params.box_rasterization_resolution;
 
-		create<Text>("test text", TextParams{ .text = "TEST135y", .font = "Font16x", .position = vec2(-1.0f, -1.0f), .scale = vec2(0.033f) });
+		create<Text>("test text", TextParams{ .text = "TEST135y", .font = "Font16x", .position = vec2(-1.0f, -1.0f), .scale = vec2(0.15f) });
 		create<Points>("points", PointsParams
 			{
 				.position = { vec2(-0.5f, 0.5) },
@@ -199,7 +199,7 @@ namespace night
 			create<Points>("Points", PointsParams
 				{
 					.position = p,
-					.scale = vec2{0.033f},
+					.scale = vec2{0.166f},
 					.amount = _deltaScore
 				}
 			);

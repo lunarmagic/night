@@ -27,6 +27,8 @@ namespace night
 
 	vec2 NIGHT_API slerp(const vec2& a, const vec2& b, real t);
 
+	real NIGHT_API angle(const vec2 v);
+
 	real NIGHT_API angle_clockwise(const vec2& a, const vec2& b);
 
 	real NIGHT_API angle_counter_clockwise(const vec2& a, const vec2& b);

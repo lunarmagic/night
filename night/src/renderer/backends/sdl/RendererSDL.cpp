@@ -96,15 +96,42 @@ namespace night
 		{
 			WindowSDL* sdl_window = (WindowSDL*)window();
 			Quad quad = q;
+			quad.vertices[0].point = mvp() * quad.vertices[0].point;
+			quad.vertices[1].point = mvp() * quad.vertices[1].point;
+			quad.vertices[2].point = mvp() * quad.vertices[2].point;
+			quad.vertices[3].point = mvp() * quad.vertices[3].point;
+			quad.vertices[4].point = mvp() * quad.vertices[4].point;
+			quad.vertices[5].point = mvp() * quad.vertices[5].point;
 
-			quad.vertices[0].point = sdl_window->local_to_internal(quad.vertices[0].point);
-			quad.vertices[1].point = sdl_window->local_to_internal(quad.vertices[1].point);
-			quad.vertices[2].point = sdl_window->local_to_internal(quad.vertices[2].point);
-			quad.vertices[3].point = sdl_window->local_to_internal(quad.vertices[3].point);
-			quad.vertices[4].point = sdl_window->local_to_internal(quad.vertices[4].point);
-			quad.vertices[5].point = sdl_window->local_to_internal(quad.vertices[5].point);
+			struct _vertex
+			{
+				fvec2 point;
+				Color8 color;
+				fvec2 texture_coord;
+			} vertices[6];
 
-			SDL_RenderGeometry(_sdlRenderer, texture->sdl_texture(), (SDL_Vertex*)quad.vertices, 6, nullptr, 6);
+			vertices[0].point = sdl_window->local_to_internal((fvec2)quad.vertices[0].point);
+			vertices[1].point = sdl_window->local_to_internal((fvec2)quad.vertices[1].point);
+			vertices[2].point = sdl_window->local_to_internal((fvec2)quad.vertices[2].point);
+			vertices[3].point = sdl_window->local_to_internal((fvec2)quad.vertices[3].point);
+			vertices[4].point = sdl_window->local_to_internal((fvec2)quad.vertices[4].point);
+			vertices[5].point = sdl_window->local_to_internal((fvec2)quad.vertices[5].point);
+
+			vertices[0].color = quad.vertices[0].color;
+			vertices[1].color = quad.vertices[1].color;
+			vertices[2].color = quad.vertices[2].color;
+			vertices[3].color = quad.vertices[3].color;
+			vertices[4].color = quad.vertices[4].color;
+			vertices[5].color = quad.vertices[5].color;
+
+			vertices[0].texture_coord = quad.vertices[0].texture_coord;
+			vertices[1].texture_coord = quad.vertices[1].texture_coord;
+			vertices[2].texture_coord = quad.vertices[2].texture_coord;
+			vertices[3].texture_coord = quad.vertices[3].texture_coord;
+			vertices[4].texture_coord = quad.vertices[4].texture_coord;
+			vertices[5].texture_coord = quad.vertices[5].texture_coord;
+
+			SDL_RenderGeometry(_sdlRenderer, texture->sdl_texture(), (SDL_Vertex*)vertices, 6, nullptr, 6);
 		}
 		else
 		{

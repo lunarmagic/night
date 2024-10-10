@@ -70,23 +70,23 @@ namespace night
 
 	typedef glm::ivec1  ivec1;
 	typedef glm::ivec2  ivec2;
-	typedef glm::ivec2  ivec3;
-	typedef glm::ivec2  ivec4;
+	typedef glm::ivec3  ivec3;
+	typedef glm::ivec4  ivec4;
 
 	typedef glm::uvec1  uvec1;
 	typedef glm::uvec2  uvec2;
-	typedef glm::uvec2  uvec3;
-	typedef glm::uvec2  uvec4;
+	typedef glm::uvec3  uvec3;
+	typedef glm::uvec4  uvec4;
 
 	typedef glm::fvec1  fvec1;
 	typedef glm::fvec2  fvec2;
-	typedef glm::fvec2  fvec3;
-	typedef glm::fvec2  fvec4;
+	typedef glm::fvec3  fvec3;
+	typedef glm::fvec4  fvec4;
 
 	typedef glm::dvec1  dvec1;
 	typedef glm::dvec2  dvec2;
-	typedef glm::dvec2  dvec3;
-	typedef glm::dvec2  dvec4;
+	typedef glm::dvec3  dvec3;
+	typedef glm::dvec4  dvec4;
 
 #ifdef NIGHT_USE_DOUBLE_PRECISION
 	typedef glm::dmat2		 mat2;

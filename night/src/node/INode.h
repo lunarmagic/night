@@ -19,7 +19,13 @@ namespace night
 
 	struct RenderGraph
 	{
-		multimap<real, ref<INode>> graph;
+		struct Node
+		{
+			ref<INode> node;
+			mat4 relative_transform;
+		};
+
+		multimap<real, Node> graph;
 	};
 
 	struct NIGHT_API INode : public std::enable_shared_from_this<INode>
@@ -47,6 +53,9 @@ namespace night
 
 		real depth() const { return _depth; }
 		void depth(real depth) { _depth = depth; }
+
+		const mat4& transform() const { return _transform; }
+		void transform(const mat4& x) { _transform = x; }
 
 		u8 is_pending_destruction() const { return _isPendingDestruction; }
 
@@ -82,6 +91,7 @@ namespace night
 		u8 _isPendingDestruction{false};
 		ENodeVisibility _visibility{ ENodeVisibility::Visible };
 		real _depth{ 0 };
+		mat4 _transform{mat4(1)};
 		// TODO: add _static_type
 	};
 

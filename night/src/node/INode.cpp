@@ -96,9 +96,12 @@ namespace night
 		for (auto i = graph.graph.begin(); i != graph.graph.end(); i++)
 		{
 			auto& element = (*i);
-			ASSERT(element.second != nullptr);
-			element.second->on_render();
+			ASSERT(element.second.node != nullptr);
+			utility::renderer().mvp(element.second.relative_transform);
+			element.second.node->on_render();
 		}
+
+		utility::renderer().mvp(mat4(1));
 	}
 
 	void INode::render(RenderGraph& out_graph)
@@ -122,7 +125,7 @@ namespace night
 		if (_visibility == ENodeVisibility::Visible)
 		{
 			// TODO: if element is type Node2D or Node3D, apply transformation
-			out_graph.graph.insert({ _depth, shared_from_this() });
+			out_graph.graph.insert({ _depth, {shared_from_this(), _transform } }); // TODO: get relative to parent transform
 		}
 	}
 

@@ -24,6 +24,9 @@ namespace night
 		virtual void draw_line(const vec2& p1, const vec2& p2, const Color& color) const = 0;
 		virtual void draw_quad(const Quad& quad, ref<ITexture> texture) const = 0;
 
+		const fmat4& mvp() const { return _mvp; }
+		void mvp(const fmat4& mvp) { _mvp = mvp; }
+
 	protected:
 
 		IWindow* window() const { return _window; }
@@ -31,6 +34,7 @@ namespace night
 	private:
 
 		IWindow* _window;
+		fmat4 _mvp{fmat4(1)};
 		// TODO: mvp
 	};
 

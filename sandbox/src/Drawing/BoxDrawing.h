@@ -79,7 +79,7 @@ private:
 
 
 	u8 _should_evaluate_far_corners{ true }; // it is much easier to draw a box with only near corners.
-	real _t_box_approximation_threshhold{ 0.02f };
+	real _t_box_approximation_threshhold{ 0.01f };
 	real _rasterization_clip_area_weight{ 1.0f };
 	u8 _show_debug_info{ true };
 

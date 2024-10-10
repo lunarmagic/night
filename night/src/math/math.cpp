@@ -48,6 +48,11 @@ namespace night
 		return (a * cos(theta)) + (relative * sin(theta));
 	}
 
+	real NIGHT_API angle(const vec2 v)
+	{
+		return atan2(v.x, v.y);
+	}
+
 	real angle_clockwise(const vec2& a, const vec2& b)
 	{
 		real d = a.x * b.x + a.y * b.y;

@@ -45,6 +45,13 @@ namespace night
 
 	void Points::on_update(real delta)
 	{
-		position(position() + _velocity * delta);
+		//position(position() + _velocity * delta);
+
+		translate(_velocity * delta);
+		//rotate(delta * 5.0f);
+
+		//mat4 x = transform();
+		//x = translate(x, vec3(_velocity * delta, 0.0f));
+		//transform(x);
 	}
 }

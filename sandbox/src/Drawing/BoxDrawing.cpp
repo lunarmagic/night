@@ -65,13 +65,6 @@ namespace night
 
 		Quad quad(box_bounds);
 
-		//// TODO: place shader Quad so it overlaps the contour perfectly.
-		//_compute_shader.init({ .width = params.rasterization_resolution, .height = params.rasterization_resolution, .quad = quad });
-		//_compute_shader.clear(Color8{ 255, 255, 255, 30 });
-
-		//_debug_shader.init({ .width = _compute_shader.width(), .height = _compute_shader.height(), .quad = quad });
-		//_debug_shader.clear(Color8{ 255, 255, 255, 0 });
-
 		// TODO: use macro
 		_debug_shader = create<ComputeShader>("Box Drawing Debug Shader", ComputeShaderParams{
 			.width = params.rasterization_resolution,
@@ -79,8 +72,8 @@ namespace night
 			.quad = quad
 			}
 		);
-		_debug_shader->fill(0xFF);
-		_debug_shader->visibility(ENodeVisibility::Invisible_Tree);
+		_debug_shader->fill(0x00);
+		//_debug_shader->visibility(ENodeVisibility::Invisible_Tree);
 
 		_compute_shader = create<ComputeShader>("Box Drawing Compute Shader", ComputeShaderParams{
 			.width = params.rasterization_resolution,
@@ -977,7 +970,6 @@ namespace night
 		if (_show_debug_info) // TODO: add debug renderer.
 		{
 			//_debug_shader.render();
-		
 
 			for (const auto& i : _canidates[0].clips)
 			{
