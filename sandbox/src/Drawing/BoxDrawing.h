@@ -42,6 +42,8 @@ struct BoxDrawing : public Node2D
 
 	AABB aabb();
 
+	static real view_angle(const vec2& vp0, const vec2& vp1, const vec2& vp2, const vec2& orthoceneter);
+
 protected:
 
 	virtual void on_render() override; // TODO: add debug_render
@@ -57,20 +59,10 @@ private:
 		real i_box_probability{ -1.0f };
 		real raster_score{ -1.0f };
 		real canidate_probability{ -1.0f };
-
-		//struct
-		//{
-		//	vec2 vp;
-		//	real global_par;
-		//	real local_par;
-		//}vps[3];
-
 		array<vec2, 3> vps;
-
 		vector<Polygon> clips;
 		EBoxDrawingType type;
 		s32 index{ -1 };
-
 		real view_angle;
 		vec2 orthocenter;
 	};

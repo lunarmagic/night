@@ -27,6 +27,9 @@ namespace night
 		const fmat4& mvp() const { return _mvp; }
 		void mvp(const fmat4& mvp) { _mvp = mvp; }
 
+		void clear_color(const Color& color) { _clearColor = color; }
+		const Color& clear_color() const { return _clearColor; }
+
 	protected:
 
 		IWindow* window() const { return _window; }
@@ -35,6 +38,7 @@ namespace night
 
 		IWindow* _window;
 		fmat4 _mvp{fmat4(1)};
+		Color _clearColor{ WHITE };
 		// TODO: mvp
 	};
 

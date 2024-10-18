@@ -122,7 +122,7 @@ namespace night
 
 	namespace debug
 	{
-		template<> inline string _print_format<INode>(INode& v)
+		template<> inline string _Log::_print_format<INode>(INode& v)
 		{
 			sstream stream;
 			stream << "\n";

@@ -342,17 +342,17 @@ namespace night
 		{
 			if (_isPendingTextureUpdate)
 			{
-//#ifdef NIGHT_ENABLE_LOGGING
-//				s32 mask = debug::_debug_logging_mask;
-//				debug::_debug_logging_mask = DEBUG_LOG_MASK_OFF;
-//#endif
+#ifdef NIGHT_ENABLE_LOGGING
+				s32 mask = debug::_Log::_debug_logging_mask;
+				debug::_Log::_debug_logging_mask = DEBUG_LOG_MASK_OFF;
+#endif
 
 				utility::window().destroy_texture(_window_id);
 				_texture = utility::window().create_texture(_window_id, { .width = _surface->width(), .height = _surface->height(), .surface = _surface });
 
-//#ifdef NIGHT_ENABLE_LOGGING
-//				debug::_debug_logging_mask = mask;
-//#endif
+#ifdef NIGHT_ENABLE_LOGGING
+				debug::_Log::_debug_logging_mask = mask;
+#endif
 
 				ASSERT(_texture != nullptr);
 				_isPendingTextureUpdate = false;

@@ -13,7 +13,7 @@ namespace night
 	{
 		const mat4& transform{ mat4(1) };
 		const vec3& extents{ 1, 1, 1 };
-		const Color& color{ LIGHT };
+		const Color& color{ BLACK };
 	};
 
 	struct Box : public IForm // TODO: add Node3D
@@ -28,7 +28,7 @@ namespace night
 			vec3 normal;
 		};
 
-		array<Plane, 6> planes() const;
+		array<Plane, 6> planes() const; // TODO: return ref to cached planes
 		// get the contour in global 3d space, winding order
 		vector<vec4> contour();
 
@@ -41,6 +41,7 @@ namespace night
 	private:
 
 		array<vec4, 8> _points;
-		Color _color{ LIGHT };
+		Color _color{ BLACK };
+		Color _farCornerColor{ WHITE * 0.95f }; // TODO: make line renderer that uses alpha
 	};
 }

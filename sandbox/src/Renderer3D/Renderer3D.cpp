@@ -24,6 +24,11 @@ vec4 Renderer3D::project_point_to_view_plane(const vec4& point)
 		return project_point_semi_curvilinear(point);
 		break;
 	}
+	case EPerspectiveMode::Parallel:
+	{
+		return project_point_parallel(point);
+		break;
+	}
 	}
 
 	return {};
@@ -32,6 +37,15 @@ vec4 Renderer3D::project_point_to_view_plane(const vec4& point)
 constexpr vec3 _forward = { 0.0f, 0.0f, 1.0f };
 constexpr vec3 _up = { 0.0f, -1.0f, 0.0f };
 constexpr vec3 _right = { 1.0f, 0.0f, 0.0f };
+
+u8 Renderer3D::should_cull_face(const vec4& p1, const vec4& p2, const vec4& p3)
+{
+	vec2 pp1 = project_point_to_view_plane(p1);
+	vec2 pp2 = project_point_to_view_plane(p2);
+	vec2 pp3 = project_point_to_view_plane(p3);
+
+	return (perp_dot(pp2 - pp1, pp3 - pp2) >= 0.0f);
+}
 
 vec4 Renderer3D::project_point_linear(const vec4& point)
 {
@@ -71,6 +85,12 @@ vec4 Renderer3D::project_point_semi_curvilinear(const vec4& p) // TODO: remove t
 	}
 
 	return result;
+}
+
+vec4 Renderer3D::project_point_parallel(const vec4& point)
+{
+	vec3 from = _mvp * point;
+	return { from.x * 0.2f * _view_angle, from.y * 0.2f * _view_angle, from.z, 1.0f };
 }
 
 vec4 Renderer3D::inverse_project_point_to_view_plane(const vec2& point)

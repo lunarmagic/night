@@ -51,11 +51,11 @@ namespace night
 		real _averageViewAngle{ 0.0f };
 		real _averageViewAngleWeighted{ 0.0f };
 		real _viewAngleVariance{ 0.0f };
-		real _viewAngleVarienceWeight{ 50.0f };
+		real _viewAngleVarienceWeight{ 25.0f }; // TODO: set this so you get 0 points on the worst possible box.
 
 		vec2 _averageOrthocenter{ vec2(0) };
 		vec2 _orthocenterVariance{ vec2(0) };
-		real _orthocenterVarienceWeight{ 50.0f };
+		real _orthocenterVarienceWeight{ 1.0f };
 
 		real _score{ 0.0f };
 		real _deltaScore{ 0.0f };

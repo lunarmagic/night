@@ -363,6 +363,14 @@ namespace night
 		return -1.0;
 	}
 
+	real BoxDrawing::view_angle(const vec2& vp0, const vec2& vp1, const vec2& vp2, const vec2& oc)
+	{
+		// TODO: return -1 if oc is not within triangle.
+		real v = distance(vp0, oc);
+		real w = perpendicular_distance(vp1, vp2, oc);
+		return sqrt(v * w);
+	}
+
 	BoxDrawing::BoxDrawingCanidate BoxDrawing::evaluate_i_box_canidate(s32 index)
 	{
 		BoxDrawingCanidate result = {};
@@ -500,9 +508,10 @@ namespace night
 
 		result.orthocenter = calculate_orthocenter(vpl, vps1, vps2);
 
-		real v = distance(vpl, result.orthocenter);
-		real w = perpendicular_distance(vps1, vps2, result.orthocenter);
-		result.view_angle = sqrt(v * w);
+		//real v = distance(vpl, result.orthocenter);
+		//real w = perpendicular_distance(vps1, vps2, result.orthocenter);
+		//result.view_angle = sqrt(v * w);
+		result.view_angle = view_angle(vpl, vps1, vps2, result.orthocenter);
 
 		result.canidate_probability = result.raster_score * result.i_box_probability;
 
@@ -832,9 +841,10 @@ namespace night
 
 		result.orthocenter = calculate_orthocenter(vps[0].vp, vps[1].vp, vps[2].vp);
 
-		real v = distance(vps[0].vp, result.orthocenter);
-		real w = perpendicular_distance(vps[1].vp, vps[2].vp, result.orthocenter);
-		result.view_angle = sqrt(v * w);
+		//real v = distance(vps[0].vp, result.orthocenter);
+		//real w = perpendicular_distance(vps[1].vp, vps[2].vp, result.orthocenter);
+		//result.view_angle = sqrt(v * w);
+		result.view_angle = view_angle(vps[0].vp, vps[1].vp, vps[2].vp, result.orthocenter);
 
 		result.vps[0] = vps[0].vp;
 		result.vps[1] = vps[1].vp;

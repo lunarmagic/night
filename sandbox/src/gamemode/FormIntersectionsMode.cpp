@@ -383,10 +383,11 @@ namespace night
 				auto& line = intersection.lines[j];
 
 				//if (dot(__camera_direction, line.normal1) < 0.0f || dot(__camera_direction, line.normal2) < 0.0f)
-				if (cull_normal(line.normal1, line.p1) || cull_normal(line.normal2, line.p1))
-				{
-					continue;
-				}
+				//if (cull_normal(line.normal1, line.p1) || cull_normal(line.normal2, line.p1))
+				//{
+				//	continue;
+				//}
+				// TODO: fix this
 
 				vec4 p1 = Renderer3D::project_point_to_view_plane(vec4(line.p1.x, line.p1.y, line.p1.z, 1.0f));
 				vec4 p2 = Renderer3D::project_point_to_view_plane(vec4(line.p2.x, line.p2.y, line.p2.z, 1.0f));

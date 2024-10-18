@@ -139,6 +139,7 @@
     <ClInclude Include="src\Drawing\Canvas.h" />
     <ClInclude Include="src\Drawing\Line.h" />
     <ClInclude Include="src\Drawing\temp.h" />
+    <ClInclude Include="src\gamemode\FormIntersectionsParallelMode.h" />
     <ClInclude Include="src\Polygon\Polygon.h" />
     <ClInclude Include="src\Polygon\Polygon3D.h" />
     <ClInclude Include="src\Renderer3D\Renderer3D.h" />
@@ -158,6 +159,7 @@
     <ClCompile Include="src\ComputeShader\ComputeShader.cpp" />
     <ClCompile Include="src\Drawing\BoxDrawing.cpp" />
     <ClCompile Include="src\Drawing\Canvas.cpp" />
+    <ClCompile Include="src\gamemode\FormIntersectionsParallelMode.cpp" />
     <ClCompile Include="src\Polygon\Polygon.cpp" />
     <ClCompile Include="src\Polygon\Polygon3D.cpp" />
     <ClCompile Include="src\Renderer3D\Renderer3D.cpp" />

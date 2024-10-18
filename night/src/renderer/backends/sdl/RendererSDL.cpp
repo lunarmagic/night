@@ -67,7 +67,8 @@ namespace night
 	{
 		SDL_RenderPresent(_sdlRenderer);
 
-		SDL_SetRenderDrawColor(_sdlRenderer, 0, 0, 0, 255);
+		Color8 cc = Color8(clear_color());
+		SDL_SetRenderDrawColor(_sdlRenderer, cc.r, cc.g, cc.b, cc.a);
 		SDL_RenderClear(_sdlRenderer);
 	}
 

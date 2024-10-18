@@ -161,8 +161,10 @@ namespace night
 				.p1 = p1,
 				.p2 = p2,
 				.thickness1 = _lineThickness,
+				.thickness2 = _lineThickness,
 				.exponent = _lineExponent,
-				.color1 = _lineColor
+				.color1 = _lineColor,
+				.color2 = _lineColor
 			}
 		);
 

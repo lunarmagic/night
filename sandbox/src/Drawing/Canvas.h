@@ -6,6 +6,7 @@
 #include "ComputeShader/ComputeShader.h"
 
 #define CANVAS_DEFAULT_SMOOTHING 10
+#define CANVAS_DEFAULT_LINE_THICKNESS 0.005f
 
 namespace night
 {
@@ -46,7 +47,7 @@ namespace night
 		Color _canvasColor{ BLACK };
 		Color _lineColor{ WHITE };
 
-		real _lineThickness{ 0.005f };
+		real _lineThickness{ CANVAS_DEFAULT_LINE_THICKNESS };
 		real _lineExponent{ 2.0f };
 
 		u8 _isDrawingLine{ false };

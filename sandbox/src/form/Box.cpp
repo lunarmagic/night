@@ -147,25 +147,50 @@ namespace night
 	void Box::on_render() // TODO: only debug render
 	{
 		auto planes_global = planes();
+
+		vector<array<vec2, 4>> near_planes;
+		vector<array<vec2, 4>> far_planes;
 		
 		for (s32 i = 0; i < planes_global.size(); i++)
 		{
 			auto& plane = planes_global[i];
-			vec2 proj[4];
+			array<vec2, 4> proj;
+
 			for (s32 j = 0; j < plane.vertices.size(); j++)
 			{
 				proj[j] = Renderer3D::project_point_to_view_plane(vec4(plane.vertices[j].x, plane.vertices[j].y, plane.vertices[j].z, 1.0f));
 			}
-		
+
+			//Color color = _color;
+
+			//if (perp_dot(proj[1] - proj[0], proj[2] - proj[1]) <= 0.0f)
+			if (!Renderer3D::should_cull_face(vec4(plane.vertices[0], 1), vec4(plane.vertices[1], 1), vec4(plane.vertices[2], 1)))
+			{
+				//color *= 0.25f;
+				near_planes.push_back(proj);
+			}
+			else
+			{
+				far_planes.push_back(proj);
+			}
+		}
+
+		for (s32 i = 0; i < far_planes.size(); i++)
+		{
+			auto& plane = far_planes[i];
 			for (s32 j = 0; j < 4; j++)
 			{
-				utility::renderer().draw_line(proj[j], proj[(j + 1) % 4], _color);
+				utility::renderer().draw_line(plane[j], plane[(j + 1) % 4], _farCornerColor);
 			}
-		
-		
-			//vec2 p1 = Renderer3D::project_point_to_view_plane(vec4(plane.vertices[0], 1.0f));
-			//vec2 p2 = Renderer3D::project_point_to_view_plane(vec4(plane.vertices[0] + plane.normal, 1.0f));
-			//Window::get().draw_line(p1, p2, GREEN);
+		}
+
+		for (s32 i = 0; i < near_planes.size(); i++)
+		{
+			auto& plane = near_planes[i];
+			for (s32 j = 0; j < 4; j++)
+			{
+				utility::renderer().draw_line(plane[j], plane[(j + 1) % 4], _color);
+			}
 		}
 
 		//vec2 points_proj[8];
@@ -173,19 +198,19 @@ namespace night
 		//{
 		//	points_proj[i] = Renderer3D::project_point_to_view_plane((transform() * _points[i]));
 		//}
-
+		//
 		//// front face
 		//Window::get().draw_line(points_proj[0], points_proj[1], _color);
 		//Window::get().draw_line(points_proj[1], points_proj[2], _color);
 		//Window::get().draw_line(points_proj[2], points_proj[3], _color);
 		//Window::get().draw_line(points_proj[3], points_proj[0], _color);
-
+		//
 		//// back face
 		//Window::get().draw_line(points_proj[4], points_proj[5], _color);
 		//Window::get().draw_line(points_proj[5], points_proj[6], _color);
 		//Window::get().draw_line(points_proj[6], points_proj[7], _color);
 		//Window::get().draw_line(points_proj[7], points_proj[4], _color);
-
+		//
 		//// side faces
 		//Window::get().draw_line(points_proj[0], points_proj[4], _color);
 		//Window::get().draw_line(points_proj[1], points_proj[5], _color);

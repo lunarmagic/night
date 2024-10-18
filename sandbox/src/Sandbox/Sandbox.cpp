@@ -5,6 +5,7 @@
 #include "Renderer3D/Renderer3D.h"
 #include "gamemode/FreeformBoxesMode.h"
 #include "gamemode/FormIntersectionsMode.h"
+#include "gamemode/FormIntersectionsParallelMode.h"
 #include "log/log.h"
 
 #include <format>
@@ -24,13 +25,19 @@ namespace night
 
 	INode* Sandbox::create_root()
 	{
-		return new FreeformBoxesMode();
+		//return new FreeformBoxesMode();
 
 		//return new FormIntersectionsMode(FormIntersectionsModeParams
 		//	{
 		//	.which_forms = EForm::Box
 		//	}
 		//); // TODO: add main menu node
+
+		return new FormIntersectionsParallelMode(FormIntersectionsParallelModeParams
+			{
+			.which_forms = EForm::Box
+			}
+		); // TODO: add main menu node
 	}
 
 	void Sandbox::on_load_resources()

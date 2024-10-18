@@ -1,5 +1,7 @@
 
 #include "nightpch.h"
+#include "Drawing/temp.h"
+#include "algorithm/algorithm.h"
 #include "FreeformBoxesMode.h"
 #include "Renderer3D/Renderer3D.h"
 #include "Drawing/Canvas.h"
@@ -10,6 +12,7 @@
 #include "text/Text.h"
 #include "points/Points.h"
 #include "aabb/AABB.h"
+
 
 namespace night
 {
@@ -33,6 +36,7 @@ namespace night
 
 		_testBox = create<Box>("Test Box", BoxParams{ .transform = mat4(1), .extents = {1, 1, 1} });
 		_canvas = create<Canvas>("Canvas");
+		_canvas->depth(1.0f);
 
 		_shouldEvaluateFarCorners = params.should_evaluate_far_corners;
 		_boxDrawingRasterizationResolution = params.box_rasterization_resolution;
@@ -146,8 +150,8 @@ namespace night
 		_viewAngleVariance = 0.0f;
 		_averageViewAngle = 0.0f;
 		_averageViewAngleWeighted = 0.0f;
-		_orthocenterVariance = { 0.0f, 0.0f };
-		_averageOrthocenter = { 0.0f, 0.0f };
+		//_orthocenterVariance = { 0.0f, 0.0f };
+		//_averageOrthocenter = { 0.0f, 0.0f };
 
 		real _prev_score = _score;
 		_score = 0.0f;
@@ -158,34 +162,67 @@ namespace night
 			if (box_drawing != nullptr)
 			{
 				_score += box_drawing->score();
-				_averageViewAngleWeighted += log(box_drawing->view_angle() + 1.0f);
+				_averageViewAngleWeighted += log(box_drawing->view_angle() + 1);
 				_averageViewAngle += box_drawing->view_angle();
-				_averageOrthocenter += box_drawing->orthocenter();
+				//_averageOrthocenter += box_drawing->orthocenter();
 			}
 		}
-
+		
 		_averageViewAngle /= _boxDrawings.size();
 		_averageViewAngleWeighted /= _boxDrawings.size();
-		_averageOrthocenter /= _boxDrawings.size();
-
+		//_averageOrthocenter /= _boxDrawings.size();
+		
 		for (s32 i = 0; i < _boxDrawings.size(); i++)
 		{
 			auto& box_drawing = _boxDrawings[i];
 			if (box_drawing != nullptr)
 			{
-				real view_angle_weighted = log(box_drawing->view_angle() + 1.0f);
-				auto& orthocenter = box_drawing->orthocenter();
-
-				real vw_var = ((view_angle_weighted - _averageViewAngleWeighted) * (view_angle_weighted - _averageViewAngleWeighted));
-				vec2 o_var = ((orthocenter - _averageOrthocenter) * (orthocenter * _averageOrthocenter));
-
-				_viewAngleVariance += vw_var * _viewAngleVarienceWeight + 1.0f;
-				_orthocenterVariance += o_var * _orthocenterVarienceWeight;
+				real view_angle_weighted = log(box_drawing->view_angle() + 1);
+				//auto& orthocenter = box_drawing->orthocenter();
+		
+				real vaw_var = (view_angle_weighted - _averageViewAngleWeighted) * (view_angle_weighted - _averageViewAngleWeighted);
+				//real vaw_var = view_angle_weighted - _averageViewAngleWeighted;
+				//vec2 o_var = ((orthocenter - _averageOrthocenter) * (orthocenter * _averageOrthocenter));
+		
+				_viewAngleVariance += 1.0f + vaw_var * _viewAngleVarienceWeight;
+				//_orthocenterVariance += o_var * _orthocenterVarienceWeight;
 			}
 		}
 
+		//const vec2 orthocenter = { 0, 0 };
+		////const real target_view_angle = log(RADIANS(60.0f) + 1);
+
+		//for (s32 i = 0; i < _boxDrawings.size(); i++)
+		//{
+		//	auto& box_drawing = _boxDrawings[i];
+		//	if (box_drawing != nullptr)
+		//	{
+		//		_score += box_drawing->score();
+		//		auto& vps = box_drawing->vanishing_points();
+		//		_averageViewAngleWeighted += log(BoxDrawing::view_angle(vps[0], vps[1], vps[2], orthocenter) + 1);
+		//		_averageViewAngle += box_drawing->view_angle();
+		//		//_averageOrthocenter += box_drawing->orthocenter();
+		//	}
+		//}
+
+		//_averageViewAngle /= _boxDrawings.size();
+		//_averageViewAngleWeighted /= _boxDrawings.size();
+
+		//for (s32 i = 0; i < _boxDrawings.size(); i++)
+		//{
+		//	auto& box_drawing = _boxDrawings[i];
+		//	if (box_drawing)
+		//	{
+		//		auto& vps = box_drawing->vanishing_points();
+		//		TRACE("vw: ", DEGREES(BoxDrawing::view_angle(vps[0], vps[1], vps[2], orthocenter)));
+		//		real view_angle = log(BoxDrawing::view_angle(vps[0], vps[1], vps[2], orthocenter) + 1);
+		//		
+		//		real diff = abs(view_angle - _averageViewAngleWeighted);
+		//		_viewAngleVariance += 1.0f + (diff * diff) * _viewAngleVarienceWeight;
+		//	}
+		//}
+
 		_viewAngleVariance /= _boxDrawings.size();
-		_orthocenterVariance /= _boxDrawings.size();
 		_score /= _viewAngleVariance;
 		_deltaScore = _score - _prev_score;
 
@@ -203,6 +240,8 @@ namespace night
 					.amount = _deltaScore
 				}
 			);
+
+			_averageOrthocenter = back->orthocenter();
 		}
 
 		TRACE("score: ", _score);

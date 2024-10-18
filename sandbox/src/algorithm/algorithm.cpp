@@ -26,13 +26,19 @@ namespace night
 		}
 	}
 
-	vector<vec2> make_convex_hull(const vector<vec2>& points) // TODO: fix crash
+	bool myfunction(const vec2& i, const vec2& j) { return (i.x < j.x || i.y < j.y); }
+
+	vector<vec2> make_convex_hull(const vector<vec2>& p) // TODO: fix crash
 	{
-		if (points.size() < 3)
+		if (p.size() < 3)
 		{
 			WARNING("Not enough points to make convex hull.");
 			return {};
 		}
+
+		vector<vec2> points = p; // TODO: implement a better fix for the crash
+		std::sort(points.begin(), points.end(), [](const vec2& a, const vec2& b) { return (a.x < b.x&& a.y < b.y); });
+		points.erase(std::unique(points.begin(), points.end()), points.end());
 
 		vector<vec2> result;
 
@@ -63,7 +69,7 @@ namespace night
 			}
 
 			point_on_hull = current;
-		} while (point_on_hull != left_most);
+		} while (points[point_on_hull] != points[left_most]); // TODO: implement a better fix for the crash
 
 		return result;
 	}

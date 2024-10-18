@@ -41,7 +41,7 @@ struct Polygon
 
 private:
 
-	vector<vec2> _points; // TODO: make private.
+	vector<vec2> _points;
 };
 
 struct PolygonClipResult

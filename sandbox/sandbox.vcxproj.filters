@@ -93,6 +93,7 @@
     <ClInclude Include="src\text\Text.h">
       <Filter>text</Filter>
     </ClInclude>
+    <ClInclude Include="src\gamemode\FormIntersectionsParallelMode.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\ComputeShader\ComputeShader.cpp">
@@ -145,5 +146,6 @@
       <Filter>text</Filter>
     </ClCompile>
     <ClCompile Include="src\utility.cpp" />
+    <ClCompile Include="src\gamemode\FormIntersectionsParallelMode.cpp" />
   </ItemGroup>
 </Project>
