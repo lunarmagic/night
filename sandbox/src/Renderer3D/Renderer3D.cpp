@@ -90,7 +90,7 @@ vec4 Renderer3D::project_point_semi_curvilinear(const vec4& p) // TODO: remove t
 vec4 Renderer3D::project_point_parallel(const vec4& point)
 {
 	vec3 from = _mvp * point;
-	return { from.x * 0.2f * _view_angle, from.y * 0.2f * _view_angle, from.z, 1.0f };
+	return { from.x * 0.3f * _view_angle, from.y * 0.3f * _view_angle, from.z, 1.0f };
 }
 
 vec4 Renderer3D::inverse_project_point_to_view_plane(const vec2& point)

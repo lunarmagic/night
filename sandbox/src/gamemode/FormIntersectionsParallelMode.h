@@ -28,12 +28,14 @@ namespace night
 		vec2 area{ 2, 2/*, 0*/ };
 		vec2 variation{ 1.25f, 1.25f/*, 1.25f*/ };
 
-		ivec2 internal_resolution{ 1000, 1000 };
+		ivec2 internal_resolution{ 500, 500 };
 	};
 
 	struct FormIntersectionsParallelMode : public CameraGameMode
 	{
 		FormIntersectionsParallelMode(const FormIntersectionsParallelModeParams& params);
+
+		real score() const { return _score; }
 
 	protected:
 
@@ -77,6 +79,7 @@ namespace night
 		ref<ComputeShader> _instersectionsDebugView;
 
 		FormIntersections intersect(ref<Box> form_a, ref<Box> form_b);
+		real time_of_intersection(const vec2& point_on_overlapping_forms, const FormIntersections::Intersection& intersection);
 
 		//ref<ComputeShader> _computeShader;
 		//ref<ComputeShader> _wireframe;
@@ -92,6 +95,9 @@ namespace night
 		//real _wireframeThicknessDepth{ 0.5f };
 
 		//u8 cull_normal(const vec3& normal, const vec3& point_on_plane);
+
+		real _score{ -1.0f };
+		u8 _is_submitted{ false };
 	};
 
 }

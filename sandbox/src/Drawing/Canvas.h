@@ -37,6 +37,8 @@ namespace night
 
 		const vector<vector<vec2>>& lines() const { return _lines; }
 
+		ref<ComputeShader>& compute_shader() { return _computeShader; } // TODO: make it so that depth is passed down to children.
+
 	protected:
 
 		virtual void on_update(real delte) override;

@@ -19,12 +19,12 @@ namespace night
 	{
 		Renderer3D::mode(EPerspectiveMode::Parallel);
 		_params = params;
-		Quad quad(QuadParams{});
-
-		spawn_forms();
+		//Quad quad(QuadParams{});
 
 		BIND_INPUT(EKey::DELETE, EInputType::PRESSED, [&]() { reset(); });
 		BIND_INPUT(EKey::RETURN, EInputType::PRESSED, [&]() { submit(); });
+
+		depth(3.0f); // debug
 
 		_canvas = create<Canvas>("Form Intersections Mode Canvas", CanvasParams
 			{
@@ -32,8 +32,8 @@ namespace night
 				.compute_shader_params = {.width = params.internal_resolution.x, .height = params.internal_resolution.y }
 			}
 		);
-
-		_canvas->depth(2.0f);
+		_canvas->depth(100.0f);
+		_canvas->compute_shader()->depth(100.0f); // TODO: make it so that depth is passed down to children.
 
 		_instersectionsDebugView = create<ComputeShader>("debug view", ComputeShaderParams
 			{
@@ -42,6 +42,9 @@ namespace night
 			}
 		);
 		_instersectionsDebugView->depth(1.0f);
+		_instersectionsDebugView->visibility(ENodeVisibility::Invisible);
+
+		spawn_forms();
 	}
 
 	u8 FormIntersectionsParallelMode::cull_normal(const vec3& normal, const vec3& point_on_plane) // TODO: use winding order
@@ -51,61 +54,122 @@ namespace night
 
 	void FormIntersectionsParallelMode::on_render()
 	{
-		//auto time_elapsed = utility::window().time_elapsed();
-		//auto& current = _debug_intersections[s32(time_elapsed * 10) % _debug_intersections.size()];
-		//
-		//for (s32 i = 0; i < current.size(); i++)
-		//{
-		//	auto& intersect = current[i];
-		//	for (s32 j = 0; j < intersect.lines.size(); j++)
-		//	{
-		//		Intersection::Line intersection = intersect.lines[j];
-		//
-		//		if (
-		//			Renderer3D::should_cull_face(
-		//				vec4(intersection.plane1.vertices[0], 1),
-		//				vec4(intersection.plane1.vertices[1], 1),
-		//				vec4(intersection.plane1.vertices[2], 1)
-		//			) 
-		//			||
-		//			Renderer3D::should_cull_face(
-		//				vec4(intersection.plane2.vertices[0], 1),
-		//				vec4(intersection.plane2.vertices[1], 1),
-		//				vec4(intersection.plane2.vertices[2], 1)
-		//			))
-		//		{
-		//			continue;
-		//		}
-		//
-		//		vec2 p1;
-		//		vec2 p2;
-		//
-		//		p1 = Renderer3D::project_point_to_view_plane(vec4(intersection.p1.x, intersection.p1.y, intersection.p1.z, 1.0f));
-		//		p2 = Renderer3D::project_point_to_view_plane(vec4(intersection.p2.x, intersection.p2.y, intersection.p2.z, 1.0f));
-		//
-		//		utility::renderer().draw_line(p1, p2, RED);
-		//	}
-		//}
-
-
-		for (s32 i = 0; i < _intersections.size(); i++)
+		auto time_elapsed = utility::window().time_elapsed();
+		auto& current = _debug_intersections[s32(time_elapsed * 10) % _debug_intersections.size()];
+		
+		if (_is_submitted)
 		{
-			auto& form = _intersections[i];
-			for (s32 j = 0; j < form.intersections.size(); j++)
+			for (s32 i = 0; i < current.size(); i++)
 			{
-				auto& intersection = form.intersections[j];
-				vec4 origin = Renderer3D::project_point_to_view_plane(vec4(intersection.origin, 1));
-				vec4 normal = Renderer3D::project_point_to_view_plane(vec4(intersection.normal, 1));
-				utility::renderer().draw_line(origin, origin + normal * 100.0, RED);
-				utility::renderer().draw_line(origin, origin - normal * 100.0, RED);
-				intersection.area.draw();
+				auto& intersect = current[i];
+				for (s32 j = 0; j < intersect.lines.size(); j++)
+				{
+					Intersection::Line intersection = intersect.lines[j];
+
+					if (
+						Renderer3D::should_cull_face(
+							vec4(intersection.plane1.vertices[0], 1),
+							vec4(intersection.plane1.vertices[1], 1),
+							vec4(intersection.plane1.vertices[2], 1)
+						)
+						||
+						Renderer3D::should_cull_face(
+							vec4(intersection.plane2.vertices[0], 1),
+							vec4(intersection.plane2.vertices[1], 1),
+							vec4(intersection.plane2.vertices[2], 1)
+						))
+					{
+						continue;
+					}
+
+					vec2 p1;
+					vec2 p2;
+
+					p1 = Renderer3D::project_point_to_view_plane(vec4(intersection.p1.x, intersection.p1.y, intersection.p1.z, 1.0f));
+					p2 = Renderer3D::project_point_to_view_plane(vec4(intersection.p2.x, intersection.p2.y, intersection.p2.z, 1.0f));
+
+					utility::renderer().draw_line(p1, p2, BLUE);
+				}
 			}
 		}
+
+		//for (s32 i = 0; i < _intersections.size(); i++)
+		//{
+		//	auto& form = _intersections[i];
+		//	for (s32 j = 0; j < form.intersections.size(); j++)
+		//	{
+		//		auto& intersection = form.intersections[j];
+		//		vec4 origin = Renderer3D::project_point_to_view_plane(vec4(intersection.origin, 1));
+		//		vec4 normal = Renderer3D::project_point_to_view_plane(vec4(intersection.normal, 1));
+		//		//utility::renderer().draw_line(origin, origin + normal * 100.0, BLUE);
+		//		//utility::renderer().draw_line(origin, origin - normal * 100.0, BLUE);
+		//		//intersection.area.draw();
+		//	}
+		//}
 	}
 
 	void FormIntersectionsParallelMode::submit()
 	{
-		// calculate how close you were to the intersections.
+		_score = 1.0f;
+		for (s32 i = 0; i < _intersections.size(); i++)
+		{
+			auto& form = _intersections[i];
+			vector<real> tois;
+
+			for (s32 j = 0; j < form.intersections.size(); j++)
+			{
+				auto& intersection = form.intersections[j];
+				auto& compute_shader = _canvas->compute_shader();
+
+				if (compute_shader != nullptr)
+				{
+					compute_shader->rasterize_polygon(intersection.area, [&](auto& fragment) // TODO: use gjk
+					{
+						if (fragment.pixel && fragment.pixel->a != 0)
+						{
+							vec2 global = compute_shader->internal_to_global(fragment.coordinate);
+							real toi = time_of_intersection(global, intersection);
+							tois.push_back(toi);
+						}
+					});
+				}
+
+			}
+
+			real mean = 0.0f;
+
+			for (s32 j = 0; j < tois.size(); j++)
+			{
+				mean += tois[j];
+			}
+
+			mean /= tois.size();
+
+			real variance = 0.0f;
+
+			for (s32 j = 0; j < tois.size(); j++)
+			{
+				//real view_angle_weighted = log(box_drawing->view_angle() + 1);
+				//auto& orthocenter = box_drawing->orthocenter();
+
+				real vaw_var = (tois[j] - mean) * (tois[j] - mean);
+				//real vaw_var = view_angle_weighted - _averageViewAngleWeighted;
+				//vec2 o_var = ((orthocenter - _averageOrthocenter) * (orthocenter * _averageOrthocenter));
+
+				variance += 1.0f + abs(vaw_var);
+			}
+
+			variance /= tois.size();
+			_score /= variance;
+		}
+
+		//_score -= 0.75f;
+		//_score = MAX(_score, 0);
+		//_score *= 4;
+
+		TRACE("score: ", _score);
+
+		_is_submitted = true;
 	}
 
 	void FormIntersectionsParallelMode::reset()
@@ -124,6 +188,8 @@ namespace night
 
 	void FormIntersectionsParallelMode::spawn_forms()
 	{
+		_is_submitted = false;
+
 		// Spawn in the forms with variability and density in there positions.
 		//for (s32 y = 0; y < _params.density.y; y++)
 		//{
@@ -178,6 +244,7 @@ namespace night
 			form1->rotate({ 1.0f, 0.0f, 0.0f }, random(R_PI)); // TODO: make random vector function.
 			form1->rotate({ 0.0f, 1.0f, 0.0f }, random(R_PI));
 			form1->rotate({ 0.0f, 0.0f, 1.0f }, random(R_PI));
+			form1->depth(5.0f);
 		}
 
 		auto& form2 = _forms.emplace_back(create<Box>("Form #2", BoxParams{
@@ -201,6 +268,7 @@ namespace night
 			form2->rotate({ 1.0f, 0.0f, 0.0f }, random(R_PI)); // TODO: make random vector function.
 			form2->rotate({ 0.0f, 1.0f, 0.0f }, random(R_PI));
 			form2->rotate({ 0.0f, 0.0f, 1.0f }, random(R_PI));
+			form2->depth(5.0f);
 		}
 
 		// Find points of intersection between forms.
@@ -234,6 +302,39 @@ namespace night
 		
 				auto intersection = intersect(a, b);
 				_intersections.push_back(intersection);
+			}
+		}
+
+		for (s32 i = 0; i < _intersections.size(); i++)
+		{
+			auto& form = _intersections[i];
+			for (s32 j = 0; j < form.intersections.size(); j++)
+			{
+				auto& intersection = form.intersections[j];
+				vec2 p1 = Renderer3D::project_point_to_view_plane(vec4(intersection.origin, 1));
+				vec2 p2 = Renderer3D::project_point_to_view_plane(vec4(intersection.origin + intersection.normal, 1));
+				//vec2 n = normalize(Renderer3D::project_point_to_view_plane(vec4(intersection.normal, 1)));
+				vec2 n = normalize(p2 - p1);
+
+				_instersectionsDebugView->rasterize_polygon(intersection.area, [&](auto& fragment)
+				{
+					if (fragment.pixel)
+					{
+						vec2 global = _instersectionsDebugView->internal_to_global(fragment.coordinate);
+
+						vec2 proj = project_point_to_plane(global, p1, n);
+
+						real slope = perp_dot(n, proj - global);
+						slope /= intersection.slope;
+
+						//real dist = perpendicular_distance(p1, p2, global);
+						slope = CLAMP(slope, -1, 1);
+						slope += 1;
+						slope /= 2;
+
+						*fragment.pixel = Color::lerp(GREEN, RED, slope);
+					}
+				});
 			}
 		}
 	}
@@ -357,6 +458,20 @@ namespace night
 				// TODO: raycast and be parallel with line, and fail.
 				vec3 point_i = raycast_to_plane(plane_a.vertices[0], plane_a.vertices[1], plane_b.vertices[0], normal_b);
 
+				vec3 forward = { 0.0f, 0.0f, 1.0f };
+
+				vec3 point_s = raycast_to_plane(plane_a.vertices[0] + forward, plane_a.vertices[1] + forward, plane_b.vertices[0], normal_b);
+
+				vec2 proj_s = Renderer3D::project_point_to_view_plane(vec4(point_s, 1));
+				vec2 proj_i = Renderer3D::project_point_to_view_plane(vec4(point_i, 1));
+				vec2 proj_n = Renderer3D::project_point_to_view_plane(vec4(normal_i, 1));
+
+				proj_n = normalize(proj_n);
+
+				vec2 proj = project_point_to_plane(proj_s, proj_i, proj_n);
+
+				real slope = perp_dot(proj_n, proj - proj_s);
+
 				result.intersections.push_back(
 				{
 					.plane_a = i,
@@ -364,12 +479,27 @@ namespace night
 					.area = area,
 					.origin = point_i,
 					.normal = normal_i,
-					.slope = 0.0f
+					.slope = slope
 				});
 			}
 		}
 
 		return result;
+	}
+
+	real FormIntersectionsParallelMode::time_of_intersection(const vec2& point_on_overlapping_forms, const FormIntersections::Intersection& intersection)
+	{
+		vec2 p1 = Renderer3D::project_point_to_view_plane(vec4(intersection.origin, 1));
+		vec2 p2 = Renderer3D::project_point_to_view_plane(vec4(intersection.origin + intersection.normal, 1));
+		//vec2 n = normalize(Renderer3D::project_point_to_view_plane(vec4(intersection.normal, 1)));
+		vec2 n = normalize(p2 - p1);
+
+		vec2 proj = project_point_to_plane(point_on_overlapping_forms, p1, n);
+
+		real slope = perp_dot(n, proj - point_on_overlapping_forms);
+		slope /= intersection.slope;
+
+		return slope;
 	}
 
 	void FormIntersectionsParallelMode::clear_forms()
@@ -387,6 +517,7 @@ namespace night
 		_forms.clear();
 		_debug_intersections.clear();
 		_intersections.clear();
+		_instersectionsDebugView->fill(0x00);
 	}
 }
 

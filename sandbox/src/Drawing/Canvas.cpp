@@ -156,17 +156,25 @@ namespace night
 			return;
 		}
 
-		_computeShader->draw_line(
+		_computeShader->rasterize_line(p1, p2, [&](auto& fragment)
+		{
+			if (fragment.pixel != nullptr)
 			{
-				.p1 = p1,
-				.p2 = p2,
-				.thickness1 = _lineThickness,
-				.thickness2 = _lineThickness,
-				.exponent = _lineExponent,
-				.color1 = _lineColor,
-				.color2 = _lineColor
+				*fragment.pixel = Color8(_lineColor);
 			}
-		);
+		});
+
+		//_computeShader->draw_line(
+		//	{
+		//		.p1 = p1,
+		//		.p2 = p2,
+		//		.thickness1 = _lineThickness,
+		//		.thickness2 = _lineThickness,
+		//		.exponent = _lineExponent,
+		//		.color1 = _lineColor,
+		//		.color2 = _lineColor
+		//	}
+		//);
 
 		//Polygon polygon;
 		//
