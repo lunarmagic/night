@@ -42,7 +42,7 @@ namespace night
 	protected:
 
 		virtual void on_update(real delte) override;
-		//virtual void on_render() override;
+		virtual void on_render() override;
 
 	private:
 

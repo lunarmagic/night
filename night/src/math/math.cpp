@@ -237,11 +237,11 @@ namespace night
 		return result;
 	}
 
-	vec2 project_point_to_plane(const vec2& point, const vec2& plane_origin, const vec2& plane_normal)
+	ProjectPointToPlaneResult project_point_to_plane(const vec2& point, const vec2& plane_origin, const vec2& plane_normal)
 	{
 		real t = dot(point - plane_origin, plane_normal) / dot(plane_normal, plane_normal);
 		vec2 projected_point = plane_origin + plane_normal * t;
-		return projected_point;
+		return {.point = projected_point, .t = t };
 	}
 
 	DistanceToLineResult distance_to_line(const vec2& line_a, const vec2& line_b, const vec2& point)

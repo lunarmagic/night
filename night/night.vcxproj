@@ -161,6 +161,7 @@
     <ClInclude Include="src\event\MouseEvent.h" />
     <ClInclude Include="src\geometry\Quad.h" />
     <ClInclude Include="src\geometry\Vertex.h" />
+    <ClInclude Include="src\gjk\gjk.h" />
     <ClInclude Include="src\input\EInput.h" />
     <ClInclude Include="src\input\InputKey.h" />
     <ClInclude Include="src\log\log.h" />
@@ -182,6 +183,7 @@
     <ClCompile Include="src\application\Application.cpp" />
     <ClCompile Include="src\color\Color.cpp" />
     <ClCompile Include="src\geometry\Quad.cpp" />
+    <ClCompile Include="src\gjk\gjk.cpp" />
     <ClCompile Include="src\log\log.cpp" />
     <ClCompile Include="src\math\math.cpp" />
     <ClCompile Include="src\nightpch.cpp">

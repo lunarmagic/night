@@ -81,6 +81,9 @@ namespace night
 		FormIntersections intersect(ref<Box> form_a, ref<Box> form_b);
 		real time_of_intersection(const vec2& point_on_overlapping_forms, const FormIntersections::Intersection& intersection);
 
+		// returns a line segment of the intersection clamped between the 2 planes
+		pair<vec2, vec2> intersection_of_time(real toi, const FormIntersections::Intersection& intersection);
+
 		//ref<ComputeShader> _computeShader;
 		//ref<ComputeShader> _wireframe;
 		ref<Canvas> _canvas;
@@ -98,6 +101,8 @@ namespace night
 
 		real _score{ -1.0f };
 		u8 _is_submitted{ false };
+
+		real _testAvgTOI{ 0 };
 	};
 
 }

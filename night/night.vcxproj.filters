@@ -122,6 +122,7 @@
     <ClInclude Include="src\window\backends\sdl\WindowSDL.h">
       <Filter>window\backends\sdl</Filter>
     </ClInclude>
+    <ClInclude Include="src\gjk\gjk.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\aabb\AABB.cpp">
@@ -171,5 +172,6 @@
     <ClCompile Include="src\window\backends\sdl\WindowSDL.cpp">
       <Filter>window\backends\sdl</Filter>
     </ClCompile>
+    <ClCompile Include="src\gjk\gjk.cpp" />
   </ItemGroup>
 </Project>

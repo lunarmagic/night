@@ -125,28 +125,28 @@ namespace night
 		}
 	}
 
-	//void Canvas::on_render() // TODO: change this to debug render
-	//{
-	//	//for (s32 i = 0; i < _lines.size(); i++)
-	//	//{
-	//	//	auto& line = _lines[i];
-	//	//	for (s32 j = 0; j < (s32)line.size() - 1; j++)
-	//	//	{
-	//	//		auto& p1 = line[j];
-	//	//		auto& p2 = line[j + 1];
-	//	//
-	//	//		Window::get().draw_line(p1, p2, _lineColor);
-	//	//	}
-	//	//}
-	//	//
-	//	//for (s32 i = 0; i < (s32)_currentLine.size() - 1; i++)
-	//	//{
-	//	//	auto& p1 = _currentLine[i];
-	//	//	auto& p2 = _currentLine[i + 1];
-	//	//
-	//	//	Window::get().draw_line(p1, p2, _lineColor);
-	//	//}
-	//}
+	void Canvas::on_render() // TODO: change this to debug render
+	{
+		//for (s32 i = 0; i < _lines.size(); i++)
+		//{
+		//	auto& line = _lines[i];
+		//	for (s32 j = 0; j < (s32)line.size() - 1; j++)
+		//	{
+		//		auto& p1 = line[j];
+		//		auto& p2 = line[j + 1];
+		//
+		//		utility::renderer().draw_line(p1, p2, _lineColor);
+		//	}
+		//}
+		//
+		//for (s32 i = 0; i < (s32)_currentLine.size() - 1; i++)
+		//{
+		//	auto& p1 = _currentLine[i];
+		//	auto& p2 = _currentLine[i + 1];
+		//
+		//	Window::get().draw_line(p1, p2, _lineColor);
+		//}
+	}
 
 	void Canvas::compute_line(const vec2& p1, const vec2& p2)
 	{
