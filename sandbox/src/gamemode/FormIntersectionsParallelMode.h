@@ -56,6 +56,30 @@ namespace night
 		vector<ref<Box>> _forms;
 		vector<vector<Intersection>> _debug_intersections;
 
+#define INTERSECTION_COVERAGE_BOUND_MIN -1
+#define INTERSECTION_COVERAGE_BOUND_MAX 1
+
+		struct IntersectionCoverageBound
+		{
+			real t;
+			s32 bound;
+
+			struct cmp
+			{
+				u8 operator() (IntersectionCoverageBound a, IntersectionCoverageBound b) const
+				{
+					if (a.t == b.t)
+					{
+						return (a.bound < b.bound);
+					}
+					else
+					{
+						return (a.t < b.t);
+					}
+				}
+			};
+		};
+
 		struct FormIntersections
 		{
 			ref<Box> form_a;
@@ -70,11 +94,17 @@ namespace night
 				vec3 origin;
 				vec3 normal;
 				real slope;
+
+				std::multiset<IntersectionCoverageBound, IntersectionCoverageBound::cmp> area_coverage;
 			};
 
 			vector<Intersection> intersections;
+			real average_toi{ 0.0f };
 		};
 
+		//FormIntersections form_intersection;
+
+		//vector<FormIntersections> _intersections;
 		vector<FormIntersections> _intersections;
 		ref<ComputeShader> _instersectionsDebugView;
 
@@ -102,7 +132,9 @@ namespace night
 		real _score{ -1.0f };
 		u8 _is_submitted{ false };
 
-		real _testAvgTOI{ 0 };
+		//real _testAvgTOI{ 0 };
+
+		//std::multiset<IntersectionCoverageBound, cmp> _testAreaCoverage;
 	};
 
 }

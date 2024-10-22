@@ -61,16 +61,54 @@ namespace night
 		{
 			for (s32 i = 0; i < _intersections.size(); i++)
 			{
-				auto& form = _intersections[i];
-				for (s32 j = 0; j < form.intersections.size(); j++)
+				auto& fi = _intersections[i];
+				for (s32 j = 0; j < fi.intersections.size(); j++)
 				{
-					auto& intersection = form.intersections[j];
+					auto& intersection = fi.intersections[j];
 					constexpr real range = 3.5f;
 					auto [p1, p2] = intersection_of_time((fmod(time_elapsed, range) - range / 2), intersection);
 					utility::renderer().draw_line(p1, p2, BLUE);
 
-					auto[ap1, ap2] = intersection_of_time(_testAvgTOI, intersection);
-					utility::renderer().draw_line(ap1, ap2, GREEN);
+					auto[ap1, ap2] = intersection_of_time(fi.average_toi, intersection);
+					//utility::renderer().draw_line(ap1, ap2, GREEN);
+
+					s32 current_bound = 0;
+					real lower_t = 0.0f;
+					real upper_t = 0.0f;
+
+					//if (intersection.area_coverage.size() >= 1)
+					//{
+					//	vec2 t1 = ap1 + (ap2 - ap1) * 0.0;
+					//	vec2 t2 = ap1 + (ap2 - ap1) * (*intersection.area_coverage.begin()).t;
+					//	utility::renderer().draw_line(t1, t2, RED);
+					//}
+
+					for (auto k = intersection.area_coverage.begin(); k != intersection.area_coverage.end(); k++)
+					{
+						if (current_bound == 0)
+						{
+							upper_t = (*k).t;
+					
+							vec2 t1 = ap1 + (ap2 - ap1) * lower_t;
+							vec2 t2 = ap1 + (ap2 - ap1) * upper_t;
+							utility::renderer().draw_line(t1, t2, RED);
+					
+							lower_t = upper_t;
+						}
+						else
+						{
+							lower_t = (*k).t;
+						}
+					
+						current_bound += (*k).bound;
+					}
+					
+					if (current_bound == 0)
+					{
+						vec2 t1 = ap1 + (ap2 - ap1) * lower_t;
+						vec2 t2 = ap1 + (ap2 - ap1) * 1.0;
+						utility::renderer().draw_line(t1, t2, RED);
+					}
 				}
 			}
 
@@ -129,30 +167,21 @@ namespace night
 		//}
 	}
 
-#define INTERSECTION_COVERAGE_BOUND_MIN -1
-#define INTERSECTION_COVERAGE_BOUND_MAX 1
-
-	struct IntersectionCoverageBound
-	{
-		real t;
-		s32 bound;
-	};
-
 	void FormIntersectionsParallelMode::submit()
 	{
 		_score = 1.0f;
 		for (s32 i = 0; i < _intersections.size(); i++)
 		{
-			auto& form = _intersections[i];
+			auto& fi = _intersections[i];
 			vector<real> tois;
 
 			real avg_toi = 0.0f;
 			s32 toi_count = 0;
 			
 			// calc variance from the lines to the intersection.
-			for (s32 j = 0; j < form.intersections.size(); j++)
+			for (s32 j = 0; j < fi.intersections.size(); j++)
 			{
-				auto& intersection = form.intersections[j];
+				auto& intersection = fi.intersections[j];
 				auto& vertices = intersection.area.points();
 
 				vec2 avg_point(0);
@@ -191,7 +220,7 @@ namespace night
 
 			avg_toi /= toi_count;
 
-			_testAvgTOI = avg_toi; // TODO: remove
+			fi.average_toi = avg_toi; // TODO: remove
 
 			real mean = 0.0f;
 
@@ -213,39 +242,34 @@ namespace night
 			_score /= variance;
 
 			// negate points from score if a segment of the avg intersection is missing lines.
-			for (s32 j = 0; j < form.intersections.size(); j++)
+			for (s32 j = 0; j < fi.intersections.size(); j++)
 			{
-				auto& intersection = form.intersections[j];
+				auto& intersection = fi.intersections[j];
+
+				//ASSERT(intersection.area_coverage.empty());
+				intersection.area_coverage.clear();
+
 				auto& vertices = intersection.area.points();
-				vec2 origin = Renderer3D::project_point_to_view_plane(vec4(intersection.origin, 1));
-				vec2 normal = normalize(vec2(Renderer3D::project_point_to_view_plane(vec4(intersection.normal, 1))));
+				//vec2 origin = Renderer3D::project_point_to_view_plane(vec4(intersection.origin, 1));
+				//vec2 normal = normalize(vec2(Renderer3D::project_point_to_view_plane(vec4(intersection.normal, 1))));
 
-				auto cmp = [](const IntersectionCoverageBound& a, const IntersectionCoverageBound& b) -> u8
-				{
-					if (a.t == b.t)
-					{
-						return (a.bound < b.bound);
-					}
-					else
-					{
-						return (a.t < b.t);
-					}
-				};
-
-				std::multiset<IntersectionCoverageBound, decltype(cmp)> area_coverage;
+				auto [p1, p2] = intersection_of_time(fi.average_toi, intersection);
 
 				for (s32 k = 0; k < _canvas->lines().size(); k++)
 				{
 					auto& lines = _canvas->lines()[k];
 					for (s32 l = 0; l < lines.size() - 1; l++)
 					{
-						auto& p1 = lines[l];
-						auto& p2 = lines[l + 1];
+						auto& l1 = lines[l];
+						auto& l2 = lines[l + 1];
 
-						if (gjk::overlap(&p1, 2, vertices.data(), vertices.size()))
+						if (gjk::overlap(&l1, 2, vertices.data(), vertices.size()))
 						{
-							auto [pp1, t_max] = project_point_to_plane(p1, origin, normal);
-							auto [pp2, t_min] = project_point_to_plane(p2, origin, normal);
+							auto [pl1, t_max] = project_point_to_plane(l1, p1, p2 - p1);
+							auto [pl2, t_min] = project_point_to_plane(l2, p1, p2 - p1);
+
+							t_max = length(pl1 - p1) / length(p2 - p1); // TODO: remove
+							t_min = length(pl2 - p1) / length(p2 - p1);
 
 							if (t_min > t_max)
 							{
@@ -255,8 +279,8 @@ namespace night
 							IntersectionCoverageBound min_bound = { .t = t_min, .bound = INTERSECTION_COVERAGE_BOUND_MIN };
 							IntersectionCoverageBound max_bound = { .t = t_max, .bound = INTERSECTION_COVERAGE_BOUND_MAX };
 
-							area_coverage.insert(min_bound);
-							area_coverage.insert(max_bound);
+							intersection.area_coverage.insert(min_bound);
+							intersection.area_coverage.insert(max_bound);
 						}
 					}
 				}
@@ -397,17 +421,17 @@ namespace night
 				auto& b = _forms[j];
 		
 				auto intersection = intersect(a, b);
-				_intersections.push_back(intersection);
+				_intersections.push_back( intersection );
 			}
 		}
 
 		// render debug view.
 		for (s32 i = 0; i < _intersections.size(); i++)
 		{
-			auto& form = _intersections[i];
-			for (s32 j = 0; j < form.intersections.size(); j++)
+			auto& fi = _intersections[i];
+			for (s32 j = 0; j < fi.intersections.size(); j++)
 			{
-				auto& intersection = form.intersections[j];
+				auto& intersection = fi.intersections[j];
 				vec2 p1 = Renderer3D::project_point_to_view_plane(vec4(intersection.origin, 1));
 				//vec2 p2 = Renderer3D::project_point_to_view_plane(vec4(intersection.origin + intersection.normal, 1));
 				vec2 n = normalize(Renderer3D::project_point_to_view_plane(vec4(intersection.normal, 1)));
