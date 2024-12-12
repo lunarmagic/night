@@ -4,7 +4,7 @@
 #include "ComputeShader/ComputeShader.h"
 #include "FormIntersectionsMode.h"
 
-//#define FORM_INTERSECTION_DEPTH_BUFFER_RESOLUTION 16
+#define FORM_INTERSECTION_IOT_ACC 25
 
 namespace night
 {
@@ -16,7 +16,7 @@ namespace night
 		vec2 area{ 2, 2 };
 		vec2 variation{ 1.25f, 1.25f };
 
-		ivec2 internal_resolution{ 500, 500 };
+		ivec2 internal_resolution{ 250, 250 };
 	};
 
 	struct FormIntersectionsParallelMode : public CameraGameMode
@@ -79,9 +79,6 @@ namespace night
 				vec3 origin;
 				vec3 normal;
 				real slope;
-
-				//std::multiset<IntersectionCoverageBound, IntersectionCoverageBound::cmp> area_coverage;
-				//array<real, 16> depth_buffer; // TODO: use area coverage.
 			};
 
 			vector<Intersection> intersections;
@@ -91,7 +88,8 @@ namespace night
 
 		vector<FormIntersections> _intersections;
 		ref<ComputeShader> _instersectionsDebugView;
-		ref<ComputeShader> _unsignedDistanceField;
+		ref<ComputeShader> _drawingUDF;
+		ref<ComputeShader> _intersectionsOfTimeUDF;
 
 		FormIntersections intersect(ref<Box> form_a, ref<Box> form_b);
 		real time_of_intersection(const vec2& point_on_overlapping_forms, const FormIntersections::Intersection& intersection);

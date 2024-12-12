@@ -26,7 +26,7 @@ namespace night
 
 		depth(500.0f); // debug
 
-		_canvas = create<Canvas>("Form Intersections Mode Canvas", CanvasParams
+		_canvas = create<Canvas>("Canvas", CanvasParams
 			{
 				.pen_color = _canvasPenColor,
 				.compute_shader_params = {.width = params.internal_resolution.x, .height = params.internal_resolution.y }
@@ -35,16 +35,25 @@ namespace night
 		_canvas->depth(100.0f);
 		_canvas->compute_shader()->depth(100.0f); // TODO: make it so that depth is passed down to children.
 
-		_unsignedDistanceField = create<ComputeShader>("Unsigned Distance Field", ComputeShaderParams
+		_drawingUDF = create<ComputeShader>("Drawing Unsigned Distance Field", ComputeShaderParams
 			{
 				.width = params.internal_resolution.x,
 				.height = params.internal_resolution.y
 			}
 		);
-		_unsignedDistanceField->depth(0.0f);
-		_unsignedDistanceField->fill(0xFF);
-		_unsignedDistanceField->visibility(ENodeVisibility::Invisible);
+		_drawingUDF->depth(0.0f);
+		_drawingUDF->visibility(ENodeVisibility::Invisible);
 
+		_intersectionsOfTimeUDF = create<ComputeShader>("Intersections Unsigned Distance Field", ComputeShaderParams
+			{
+				.width = params.internal_resolution.x,
+				.height = params.internal_resolution.y
+			}
+		);
+		_intersectionsOfTimeUDF->depth(0.0f);
+		_intersectionsOfTimeUDF->visibility(ENodeVisibility::Invisible);
+
+		// TODO: handle debug renderer.
 		_instersectionsDebugView = create<ComputeShader>("debug view", ComputeShaderParams
 			{
 				.width = params.internal_resolution.x,
@@ -166,10 +175,7 @@ namespace night
 		//}
 	}
 
-	// IDEA: make udf for the intersection lines of all tois, this shall be done across multiple frames as the player is drawing,
-	// check udf distances of all drawn pixels, add dists to toi udf distances to prevent the player from spamming pixels.
-	// this shall also prevent the situation where the player goes for a big intersection, but there is a toi with a small single line
-	// that is very near neighboring drawn pixels, thus you are given the incorrect approx_toi.
+	// TODO: only check pixels within the intersecting form overlap area, this is needed when there are multiple forms intersecting.
 	void FormIntersectionsParallelMode::submit()
 	{
 		_score = 1.0f;
@@ -225,8 +231,7 @@ namespace night
 		//
 		//	fi.average_toi = avg_toi; // TODO: remove
 		//}
-
-
+		
 		// UDF
 		struct _pixel_distance
 		{
@@ -235,10 +240,10 @@ namespace night
 			u8 alpha;
 		};
 
-		_pixel_distance* pixels = (_pixel_distance*)_unsignedDistanceField->pixels();
-		const s32 width = _unsignedDistanceField->width();
-		const s32 height = _unsignedDistanceField->height();
-		const s32 size = width * height;
+		//_pixel_distance* pixels = (_pixel_distance*)_drawingUDF->pixels();
+		//const s32 width = _drawingUDF->width();
+		//const s32 height = _drawingUDF->height();
+		//const s32 size = width * height;
 
 		vector<ivec2> neighbor_queue;
 		neighbor_queue.reserve(10000);
@@ -255,6 +260,8 @@ namespace night
 			}
 		};
 
+		_drawingUDF->fill(0xFF); // TODO: may not need to do this.
+
 		for (s32 i = 0; i < _canvas->lines().size(); i++)
 		{
 			auto& line = _canvas->lines()[i];
@@ -268,46 +275,58 @@ namespace night
 					continue;
 				}
 
-				_unsignedDistanceField->rasterize_line(p1, p2, rasterize_line); // TODO: do this as you draw.
+				_drawingUDF->rasterize_line(p1, p2, rasterize_line); // TODO: do this as you draw.
 			}
 		}
 
+		vector<ivec2> drawn_pixels = neighbor_queue;
+
 		// calculate nearest neighbor for all non-filled pixels.
-		u16 udf_distance = 1;
-
-		while (!neighbor_queue.empty()) // TODO: use clipping area of contour to save pixels.
+		auto process_udf = [&](const ref<ComputeShader>& udf)
 		{
-			for (s32 i = 0; i < neighbor_queue.size(); i++)
+			_pixel_distance* pixels = (_pixel_distance*)udf->pixels();
+			const s32 width = udf->width();
+			const s32 height = udf->height();
+			const s32 size = width * height;
+
+			u16 udf_distance = 1;
+
+			while (!neighbor_queue.empty()) // TODO: use clipping area of contour to save pixels.
 			{
-				auto& pixel_index = neighbor_queue[i];
-
-				ivec2 neighbors[4] =
+				for (s32 i = 0; i < neighbor_queue.size(); i++)
 				{
-					pixel_index + ivec2(1, 0),
-					pixel_index + ivec2(-1, 0),
-					pixel_index + ivec2(0, 1),
-					pixel_index + ivec2(0, -1)
-				};
+					auto& pixel_index = neighbor_queue[i];
 
-				for (s32 j = 0; j < 4; j++)
-				{
-					auto& neighbor = neighbors[j];
-					if (_unsignedDistanceField->is_internal_coordinate_in_bounds(neighbor))
+					ivec2 neighbors[4] =
 					{
-						_pixel_distance& pixel = pixels[neighbor.x + neighbor.y * width];
-						if (pixel.distance > udf_distance)
+						pixel_index + ivec2(1, 0),
+						pixel_index + ivec2(-1, 0),
+						pixel_index + ivec2(0, 1),
+						pixel_index + ivec2(0, -1)
+					};
+
+					for (s32 j = 0; j < 4; j++)
+					{
+						auto& neighbor = neighbors[j];
+						if (udf->is_internal_coordinate_in_bounds(neighbor))
 						{
-							pixel.distance = udf_distance;
-							next.emplace_back(neighbor);
+							_pixel_distance& pixel = pixels[neighbor.x + neighbor.y * width];
+							if (pixel.distance > udf_distance)
+							{
+								pixel.distance = udf_distance;
+								next.emplace_back(neighbor);
+							}
 						}
 					}
 				}
-			}
 
-			neighbor_queue.swap(next);
-			next.clear();
-			udf_distance++;
-		}
+				neighbor_queue.swap(next);
+				next.clear();
+				udf_distance++;
+			}
+		};
+
+		process_udf(_drawingUDF);
 
 		//// check distances from intersections to nearest drawn pixel.
 		//real dist_sum = 0.0f;
@@ -344,14 +363,14 @@ namespace night
 		//	TRACE("score: ", _score);
 		//}
 
-		constexpr s32 iot_acc = 100;
+		// UDF QUERY
 		struct IOTData
 		{
 			struct {
 				real distance_sum{ 0 };
 				s32 count{ 0 };
 				real intersection_length{ 0 };
-			} data[iot_acc];
+			} data[FORM_INTERSECTION_IOT_ACC];
 
 			//pair<real, s32> distances[iot_acc];
 		};
@@ -368,10 +387,10 @@ namespace night
 				auto& intersection = fi.intersections[j];
 				auto& iotd = iotd_sum.emplace_back();
 				
-				for (s32 k = 0; k < iot_acc; k++)
+				for (s32 k = 0; k < FORM_INTERSECTION_IOT_ACC; k++)
 				{
-					real t = (real)k / (real)(iot_acc - 1);
-					auto& [dist_sum, dist_count, toi_length] = iotd.data[k];
+					real t = (real)k / (real)(FORM_INTERSECTION_IOT_ACC - 1);
+					auto& data = iotd.data[k];
 					auto [ip1, ip2] = intersection_of_time(lerp(-iot_range, iot_range, t), intersection);
 
 					if (ip1 == ip2)
@@ -379,9 +398,9 @@ namespace night
 						continue;
 					}
 
-					toi_length += distance(ip1, ip2);
+					data.intersection_length += distance(ip1, ip2);
 
-					_unsignedDistanceField->rasterize_line(ip1, ip2, [&](auto& fragment)
+					_drawingUDF->rasterize_line(ip1, ip2, [&](auto& fragment)
 					{
 						if (fragment.pixel == nullptr)
 						{
@@ -389,8 +408,8 @@ namespace night
 						}
 
 						_pixel_distance* dist = (_pixel_distance*)fragment.pixel;
-						dist_sum += dist->distance/* / abs(intersection.slope)*/;
-						dist_count++;
+						data.distance_sum += dist->distance/* / abs(intersection.slope)*/;
+						data.count++;
 					}
 					);
 				}
@@ -399,21 +418,21 @@ namespace night
 			real min_dist = INFINITY;
 			real approx_toi = INFINITY;
 
-			for (s32 j = 0; j < iot_acc; j++)
+			for (s32 j = 0; j < FORM_INTERSECTION_IOT_ACC; j++)
 			{
-				real t = (real)j / (real)(iot_acc - 1);
+				real t = (real)j / (real)(FORM_INTERSECTION_IOT_ACC - 1);
 				real iot_dist_sum = 0;
 				s32 iot_dist_count = 0;
 
 				for (s32 k = 0; k < iotd_sum.size(); k++)
 				{
 					auto& iotd = iotd_sum[k];
-					auto& [dist_sum, dist_count, toi_length] = iotd.data[j];
+					auto& data = iotd.data[j];
 
-					if (dist_count != 0)
+					if (data.count != 0)
 					{
 						// div by toi_length means bigger intersections give more points.
-						iot_dist_sum += (dist_sum / dist_count)/* / toi_length*/;
+						iot_dist_sum += (data.distance_sum / data.count)/* / toi_length*/;
 						iot_dist_count++;
 					}
 				}
@@ -425,9 +444,55 @@ namespace night
 
 				iot_dist_sum /= iot_dist_count;
 
-				if (iot_dist_sum < min_dist)
+				// INVERSE UDF:
+				_intersectionsOfTimeUDF->fill(0xFF);
+				neighbor_queue.clear();
+				next.clear();
+
+				for (s32 k = 0; k < fi.intersections.size(); k++)
 				{
-					min_dist = iot_dist_sum;
+					auto& intersection = fi.intersections[k];
+					auto [ip1, ip2] = intersection_of_time(lerp(-iot_range, iot_range, t), intersection);
+
+					if (ip1 == ip2)
+					{
+						continue;
+					}
+
+					_intersectionsOfTimeUDF->rasterize_line(ip1, ip2, rasterize_line);
+				}
+
+				process_udf(_intersectionsOfTimeUDF);
+
+				// iterate over all drawn pixels and compare them to the udf.
+				real inverse_dist_sum = 0;
+				s32 inverse_dist_count = 0;
+				for (s32 k = 0; k < drawn_pixels.size(); k++)
+				{
+					auto& coordinate = drawn_pixels[k];
+
+					if (_intersectionsOfTimeUDF->is_internal_coordinate_in_bounds(coordinate))
+					{
+						_pixel_distance& distance = (_pixel_distance&)_intersectionsOfTimeUDF->pixel(coordinate);
+						inverse_dist_sum += (real)distance.distance;
+						inverse_dist_count++;
+					}
+				}
+
+				if (inverse_dist_count > 0)
+				{
+					inverse_dist_sum /= inverse_dist_count;
+				}
+
+				TRACE("inverse_dist_sum: ", inverse_dist_sum);
+
+				// calc approx_toi:
+				//real dist_sum = lerp(iot_dist_sum, inverse_dist_sum, 0.5f);
+				real dist_sum = iot_dist_sum / (1.0f / inverse_dist_sum);
+
+				if (dist_sum < min_dist)
+				{
+					min_dist = dist_sum;
 					approx_toi = lerp(-iot_range, iot_range, t); // TODO: store toi in data struct
 				}
 			}
@@ -437,6 +502,7 @@ namespace night
 
 			TRACE("toi: ", fi.average_toi, ", dist: ", fi.distance_to_pixels, ", inv: ",
 				(1.0 / fi.distance_to_pixels));
+
 		}
 
 		//for (s32 i = 0; i < _intersections.size(); i++)
@@ -682,8 +748,8 @@ namespace night
 		}
 
 		_canvas->clear();
-		_unsignedDistanceField->fill(0xFF);
-
+		_drawingUDF->fill(0xFF);
+		
 		spawn_forms();
 	}
 
@@ -1049,6 +1115,7 @@ namespace night
 		_debug_intersections.clear();
 		_intersections.clear();
 		_instersectionsDebugView->fill(0x00);
+		_intersectionsOfTimeUDF->fill(0xFF); // TODO: may not need to fill iotudf on clear.
 	}
 }
 
