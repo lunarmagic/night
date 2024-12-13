@@ -5,4 +5,8 @@
 
 namespace night
 {
+	IForm::IForm(EFormType type)
+		: _type(type)
+	{
+	}
 }

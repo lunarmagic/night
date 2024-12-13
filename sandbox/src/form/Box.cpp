@@ -11,6 +11,7 @@ namespace night
 {
 
 	Box::Box(const BoxParams& params)
+		: IForm(EFormType::Box)
 	{
 		transform(params.transform);
 		auto& e = params.extents;
@@ -25,7 +26,7 @@ namespace night
 		_points[6] = { e.x, e.y, e.z, 1.0f };
 		_points[7] = { -e.x, e.y, e.z, 1.0f };
 
-		_color = params.color;
+		color(params.color);
 	}
 
 	array<Box::Plane, 6> Box::planes() const
@@ -101,48 +102,48 @@ namespace night
 		return result;
 	}
 
-	vector<vec4> Box::contour()
-	{
-		vector<vec4> result;
-		array<vec2, 8> points_projected;
-
-		for (s32 i = 0; i < _points.size(); i++)
-		{
-			points_projected[i] = Renderer3D::project_point_to_view_plane(transform() * _points[i]);
-		}
-
-		s32 left_most = 0;
-
-		for (s32 i = 1; i < points_projected.size(); i++)
-		{
-			if (points_projected[i].x < points_projected[left_most].x)
-			{
-				left_most = i;
-			}
-		}
-
-		s32 point_on_hull = left_most;
-		s32 current;
-
-		do
-		{
-			//result.push_back(points[point_on_hull]);
-			result.push_back(transform() * _points[point_on_hull]);
-
-			current = (point_on_hull + 1) % points_projected.size();
-			for (s32 next = 0; next < points_projected.size(); next++)
-			{
-				if (orientation(points_projected[point_on_hull], points_projected[next], points_projected[current]) == EOrientation::CounterClockwise)
-				{
-					current = next;
-				}
-			}
-
-			point_on_hull = current;
-		} while (point_on_hull != left_most);
-
-		return result;
-	}
+	//vector<vec4> Box::contour()
+	//{
+	//	vector<vec4> result;
+	//	array<vec2, 8> points_projected;
+	//
+	//	for (s32 i = 0; i < _points.size(); i++)
+	//	{
+	//		points_projected[i] = Renderer3D::project_point_to_view_plane(transform() * _points[i]);
+	//	}
+	//
+	//	s32 left_most = 0;
+	//
+	//	for (s32 i = 1; i < points_projected.size(); i++)
+	//	{
+	//		if (points_projected[i].x < points_projected[left_most].x)
+	//		{
+	//			left_most = i;
+	//		}
+	//	}
+	//
+	//	s32 point_on_hull = left_most;
+	//	s32 current;
+	//
+	//	do
+	//	{
+	//		//result.push_back(points[point_on_hull]);
+	//		result.push_back(transform() * _points[point_on_hull]);
+	//
+	//		current = (point_on_hull + 1) % points_projected.size();
+	//		for (s32 next = 0; next < points_projected.size(); next++)
+	//		{
+	//			if (orientation(points_projected[point_on_hull], points_projected[next], points_projected[current]) == EOrientation::CounterClockwise)
+	//			{
+	//				current = next;
+	//			}
+	//		}
+	//
+	//		point_on_hull = current;
+	//	} while (point_on_hull != left_most);
+	//
+	//	return result;
+	//}
 
 	void Box::on_render() // TODO: only debug render
 	{
@@ -161,9 +162,6 @@ namespace night
 				proj[j] = Renderer3D::project_point_to_view_plane(vec4(plane.vertices[j].x, plane.vertices[j].y, plane.vertices[j].z, 1.0f));
 			}
 
-			//Color color = _color;
-
-			//if (perp_dot(proj[1] - proj[0], proj[2] - proj[1]) <= 0.0f)
 			if (!Renderer3D::should_cull_face(vec4(plane.vertices[0], 1), vec4(plane.vertices[1], 1), vec4(plane.vertices[2], 1)))
 			{
 				//color *= 0.25f;
@@ -189,7 +187,7 @@ namespace night
 			auto& plane = near_planes[i];
 			for (s32 j = 0; j < 4; j++)
 			{
-				utility::renderer().draw_line(plane[j], plane[(j + 1) % 4], _color);
+				utility::renderer().draw_line(plane[j], plane[(j + 1) % 4], color());
 			}
 		}
 

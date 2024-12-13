@@ -35,7 +35,7 @@ namespace night
 
 		return new FormIntersectionsParallelMode(FormIntersectionsParallelModeParams
 			{
-			.which_forms = EForm::Box
+			.which_forms = EFormType::Box
 			}
 		); // TODO: add main menu node
 	}

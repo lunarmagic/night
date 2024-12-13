@@ -149,13 +149,21 @@ namespace night
 
 	RaycastSphereResult NIGHT_API raycast_sphere(const vec3& ray_origin, const vec3& ray_direction, const vec3& sphere_origin, real sphere_radius);
 
-	struct ProjectPointToPlaneResult // TODO: clean this up
+	struct ProjectPointToPlaneResult2D // TODO: clean this up
 	{
 		vec2 point{};
 		real t{};
 	};
 
-	ProjectPointToPlaneResult NIGHT_API project_point_to_plane(const vec2& point, const vec2& plane_origin, const vec2& plane_normal);
+	ProjectPointToPlaneResult2D NIGHT_API project_point_to_plane(const vec2& point, const vec2& plane_origin, const vec2& plane_normal);
+
+	struct ProjectPointToPlaneResult3D // TODO: clean this up
+	{
+		vec3 point{};
+		real distance{};
+	};
+
+	ProjectPointToPlaneResult3D NIGHT_API project_point_to_plane(const vec3& point, const vec3& plane_origin, const vec3& plane_normal);
 
 	struct DistanceToLineResult
 	{

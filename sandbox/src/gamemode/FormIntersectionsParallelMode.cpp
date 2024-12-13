@@ -7,15 +7,18 @@
 #include "input/EInput.h"
 #include "application/Application.h"
 #include "Renderer3D/Renderer3D.h"
-//#include "Drawing/Line.h"
 #include "form/Intersection.h"
 #include "geometry/Quad.h"
 #include "Drawing/Canvas.h"
 #include "algorithm/algorithm.h"
 #include "gjk/gjk.h"
+#include "form/IForm.h"
+#include "form/Sphere.h"
 
 namespace night
 {
+	function<void()> _test_render;
+
 	FormIntersectionsParallelMode::FormIntersectionsParallelMode(const FormIntersectionsParallelModeParams& params)
 	{
 		Renderer3D::mode(EPerspectiveMode::Parallel);
@@ -66,172 +69,10 @@ namespace night
 		spawn_forms();
 	}
 
-	void FormIntersectionsParallelMode::on_render()
-	{
-		auto time_elapsed = utility::window().time_elapsed();
-		auto& current = _debug_intersections[s32(time_elapsed * 10) % _debug_intersections.size()];
-		
-		if (_is_submitted)
-		{
-			for (s32 i = 0; i < _intersections.size(); i++)
-			{
-				auto& fi = _intersections[i];
-				for (s32 j = 0; j < fi.intersections.size(); j++)
-				{
-					auto& intersection = fi.intersections[j];
-
-					constexpr real range = 3.5f;
-					auto [p1, p2] = intersection_of_time((fmod(time_elapsed, range) - range / 2), intersection);
-
-					if (p1 != p2)
-					{
-						utility::renderer().draw_line(p1, p2, BLUE);
-					}
-
-					auto [ap1, ap2] = intersection_of_time(fi.average_toi, intersection);
-
-					if (ap1 == ap2)
-					{
-						continue;
-					}
-
-					utility::renderer().draw_line(ap1, ap2, RED);
-
-					//for (s32 k = 0; k < intersection.depth_buffer.size() - 1; k++)
-					//{
-					//	if (intersection.depth_buffer[k] == INFINITY)
-					//	{
-					//		continue;
-					//	}
-					//
-					//	real t1 = (real)k / (real)(intersection.depth_buffer.size() - 1);
-					//	real t2 = (real)(k + 1) / (real)(intersection.depth_buffer.size() - 1);
-					//	Color color = Color::lerp(GREEN, RED, intersection.depth_buffer[k] * 10.0f);
-					//	//color.a -= intersection.depth_buffer[k] * 10.0f;
-					//	//color.a = CLAMP(color.a, 0, 1);
-					//	utility::renderer().draw_line(ap1 + (ap2 - ap1) * t1, ap1 + (ap2 - ap1) * t2, color);
-					//}
-
-					/*auto[ap1, ap2] = intersection_of_time(fi.average_toi, intersection);
-
-					if (ap1 == ap2)
-					{
-						continue;
-					}
-
-					s32 current_bound = 0;
-					real lower_t = 0.0f;
-					real upper_t = 0.0f;
-
-					for (auto k = intersection.area_coverage.begin(); k != intersection.area_coverage.end(); k++)
-					{
-						if (current_bound == 0)
-						{
-							upper_t = (*k).t;
-					
-							if (upper_t > 0.0f)
-							{
-								vec2 t1 = ap1 + (ap2 - ap1) * lower_t;
-								vec2 t2 = ap1 + (ap2 - ap1) * upper_t;
-								utility::renderer().draw_line(t1, t2, RED);
-							}
-
-							lower_t = upper_t;
-						}
-						else
-						{
-							lower_t = (*k).t;
-						}
-					
-						current_bound += (*k).bound;
-					}
-					
-					if (current_bound == 0 && lower_t < 1.0f)
-					{
-						vec2 t1 = ap1 + (ap2 - ap1) * lower_t;
-						vec2 t2 = ap1 + (ap2 - ap1) * 1.0;
-						utility::renderer().draw_line(t1, t2, RED);
-					}*/
-				}
-			}
-		}
-
-		//for (s32 i = 0; i < _intersections.size(); i++)
-		//{
-		//	auto& form = _intersections[i];
-		//	for (s32 j = 0; j < form.intersections.size(); j++)
-		//	{
-		//		auto& intersection = form.intersections[j];
-		//		vec4 origin = Renderer3D::project_point_to_view_plane(vec4(intersection.origin, 1));
-		//		vec4 normal = Renderer3D::project_point_to_view_plane(vec4(intersection.normal, 1));
-		//		utility::renderer().draw_line(origin, origin + normal * 100.0, GREEN);
-		//		utility::renderer().draw_line(origin, origin - normal * 100.0, GREEN);
-		//		intersection.area.draw();
-		//
-		//		//constexpr real range = 2.5f;
-		//		//auto [p1, p2] = intersection_of_time((fmod(time_elapsed, range) - range / 2), intersection);
-		//		//utility::renderer().draw_line(p1, p2, PURPLE);
-		//	}
-		//}
-	}
-
-	// TODO: only check pixels within the intersecting form overlap area, this is needed when there are multiple forms intersecting.
 	void FormIntersectionsParallelMode::submit()
 	{
 		_score = 1.0f;
 
-		//// calculate average toi.
-		//for (s32 i = 0; i < _intersections.size(); i++)
-		//{
-		//	auto& fi = _intersections[i]; // fi is every plane of the forms that are overlapping.
-		//	vector<real> tois;
-		//
-		//	real avg_toi = 0.0f;
-		//	s32 toi_count = 0;
-		//
-		//	for (s32 j = 0; j < fi.intersections.size(); j++)
-		//	{
-		//		auto& intersection = fi.intersections[j]; // intersection is each plane that are overlapping.
-		//		auto& vertices = intersection.area.points();
-		//
-		//		vec2 avg_point = { 0, 0 };
-		//		s32 point_count = 0;
-		//
-		//		for (s32 k = 0; k < _canvas->lines().size(); k++)
-		//		{
-		//			auto& lines = _canvas->lines()[k];
-		//			for (s32 l = 0; l < lines.size(); l++)
-		//			{
-		//				auto& point = lines[l];
-		//
-		//				if (gjk::overlap(&point, 1, vertices.data(), vertices.size()))
-		//				{
-		//					real toi = time_of_intersection(point, intersection);
-		//					tois.push_back(toi);
-		//					avg_point += point;
-		//					point_count++;
-		//				}
-		//			}
-		//		}
-		//
-		//		if (point_count > 0)
-		//		{
-		//			avg_point /= point_count;
-		//			avg_toi += time_of_intersection(avg_point, intersection);
-		//			toi_count++;
-		//		}
-		//	}
-		//
-		//	if (toi_count <= 0)
-		//	{
-		//		continue;
-		//	}
-		//
-		//	avg_toi /= toi_count;
-		//
-		//	fi.average_toi = avg_toi; // TODO: remove
-		//}
-		
 		// UDF
 		struct _pixel_distance
 		{
@@ -240,16 +81,20 @@ namespace night
 			u8 alpha;
 		};
 
-		//_pixel_distance* pixels = (_pixel_distance*)_drawingUDF->pixels();
-		//const s32 width = _drawingUDF->width();
-		//const s32 height = _drawingUDF->height();
-		//const s32 size = width * height;
-
 		vector<ivec2> neighbor_queue;
 		neighbor_queue.reserve(10000);
 
 		vector<ivec2> next;
 		next.reserve(10000);
+
+		struct drawn_pixel
+		{
+			ivec2 coordinate{ 0 };
+			s32 form_intersection{ -1 };
+		};
+
+		vector<drawn_pixel> drawn_intersection_pixels; // add which form intersection the pixels belong to.
+		drawn_intersection_pixels.reserve(10000);
 
 		auto rasterize_line = [&](const LineFragmentData& fragment)
 		{
@@ -257,6 +102,29 @@ namespace night
 			{
 				*fragment.pixel = { 0, 0, 255, 0 };
 				neighbor_queue.emplace_back(fragment.coordinate);
+
+				// add pixel to it's corresponding intersection overlap area.
+				vec2 global = _canvas->compute_shader()->internal_to_global(fragment.coordinate);
+
+				for (s32 i = 0; i < _intersections.size(); i++)
+				{
+					auto& fi = _intersections[i];
+					
+					u8 is_overlapping = false;
+					for (s32 j = 0; j < fi.intersections.size(); j++)
+					{
+						auto& intersection = fi.intersections[j];
+						
+						// TODO: make this more accurate, don't compare truncated coordinate to real polygon.
+						is_overlapping = gjk::overlap(&global, 1, intersection.area.points().data(), intersection.area.size());
+
+						if (is_overlapping)
+						{
+							drawn_intersection_pixels.push_back({ .coordinate = fragment.coordinate, .form_intersection = i });
+							return;
+						}
+					}
+				}
 			}
 		};
 
@@ -278,8 +146,6 @@ namespace night
 				_drawingUDF->rasterize_line(p1, p2, rasterize_line); // TODO: do this as you draw.
 			}
 		}
-
-		vector<ivec2> drawn_pixels = neighbor_queue;
 
 		// calculate nearest neighbor for all non-filled pixels.
 		auto process_udf = [&](const ref<ComputeShader>& udf)
@@ -328,41 +194,6 @@ namespace night
 
 		process_udf(_drawingUDF);
 
-		//// check distances from intersections to nearest drawn pixel.
-		//real dist_sum = 0.0f;
-		//s32 dist_count = 0;
-		//
-		//for (s32 i = 0; i < _intersections.size(); i++)
-		//{
-		//	auto& fi = _intersections[i];
-		//	for (s32 j = 0; j < fi.intersections.size(); j++)
-		//	{
-		//		auto& intersection = fi.intersections[j];
-		//		auto [ip1, ip2] = intersection_of_time(fi.average_toi, intersection);
-		//
-		//		_unsignedDistanceField->rasterize_line(ip1, ip2, [&](auto& fragment)
-		//			{
-		//				if (fragment.pixel == nullptr)
-		//				{
-		//					return;
-		//				}
-		//
-		//				_pixel_distance* dist = (_pixel_distance*)fragment.pixel;
-		//				dist_sum += (real)dist->distance /*/ abs(intersection.slope)*/; // TODO: add form lines to udf
-		//				dist_count++;
-		//				//TRACE(dist->distance);
-		//			}
-		//		);
-		//	}
-		//}                                                                  
-		//
-		//if (dist_count >= 0)
-		//{
-		//	dist_sum /= dist_count;
-		//	_score /= 1.0f + (dist_sum / 30.0f);
-		//	TRACE("score: ", _score);
-		//}
-
 		// UDF QUERY
 		struct IOTData
 		{
@@ -371,8 +202,6 @@ namespace night
 				s32 count{ 0 };
 				real intersection_length{ 0 };
 			} data[FORM_INTERSECTION_IOT_ACC];
-
-			//pair<real, s32> distances[iot_acc];
 		};
 
 		constexpr real iot_range = 2.0f;
@@ -467,15 +296,18 @@ namespace night
 				// iterate over all drawn pixels and compare them to the udf.
 				real inverse_dist_sum = 0;
 				s32 inverse_dist_count = 0;
-				for (s32 k = 0; k < drawn_pixels.size(); k++)
+				for (s32 k = 0; k < drawn_intersection_pixels.size(); k++)
 				{
-					auto& coordinate = drawn_pixels[k];
-
-					if (_intersectionsOfTimeUDF->is_internal_coordinate_in_bounds(coordinate))
+					if (drawn_intersection_pixels[k].form_intersection == i) // TODO: use buckets for fi overlaps.
 					{
-						_pixel_distance& distance = (_pixel_distance&)_intersectionsOfTimeUDF->pixel(coordinate);
-						inverse_dist_sum += (real)distance.distance;
-						inverse_dist_count++;
+						auto& coordinate = drawn_intersection_pixels[k].coordinate;
+
+						if (_intersectionsOfTimeUDF->is_internal_coordinate_in_bounds(coordinate))
+						{
+							_pixel_distance& distance = (_pixel_distance&)_intersectionsOfTimeUDF->pixel(coordinate);
+							inverse_dist_sum += (real)distance.distance;
+							inverse_dist_count++;
+						}
 					}
 				}
 
@@ -497,244 +329,16 @@ namespace night
 				}
 			}
 
-			fi.average_toi = approx_toi;
+			fi.approx_toi = approx_toi;
 			fi.distance_to_pixels = min_dist;
 
-			TRACE("toi: ", fi.average_toi, ", dist: ", fi.distance_to_pixels, ", inv: ",
+			TRACE("toi: ", fi.approx_toi, ", dist: ", fi.distance_to_pixels, ", inv: ",
 				(1.0 / fi.distance_to_pixels));
-
 		}
 
-		//for (s32 i = 0; i < _intersections.size(); i++)
-		//{
-		//	auto& fi = _intersections[i];
-		//	for (s32 j = 0; j < fi.intersections.size(); j++)
-		//	{
-		//		auto& intersection = fi.intersections[j];
-		//
-		//		auto [ip1, ip2] = intersection_of_time(fi.average_toi, intersection);
-		//		//intersection.depth_buffer.fill(INFINITY);
-		//
-		//		if (ip1 == ip2)
-		//		{
-		//			continue;
-		//		}
-		//
-		//		//for (s32 k = 0; k < _canvas->lines().size(); k++)
-		//		//{
-		//		//	auto& lines = _canvas->lines()[k];
-		//		//	for (s32 l = 0; l < lines.size() - 1; l++)
-		//		//	{
-		//		//		auto& lp1 = lines[l];
-		//		//		auto& lp2 = lines[l + 1];
-		//		//
-		//		//		auto pp1 = distance_to_plane(ip1, ip2, lp1);
-		//		//		auto pp2 = distance_to_plane(ip1, ip2, lp2);
-		//		//
-		//		//		if ((pp1.t < 0 && pp2.t < 0) || (pp1.t > 1 && pp2.t > 1))
-		//		//		{
-		//		//			continue; // the line is outside the bounds of the intersection.
-		//		//		}
-		//		//
-		//		//		s32 i1 = CLAMP(s32(pp1.t * intersection.depth_buffer.size()), 0, intersection.depth_buffer.size());
-		//		//		s32 i2 = CLAMP(s32(pp2.t * intersection.depth_buffer.size()), 0, intersection.depth_buffer.size());
-		//		//
-		//		//		if (i1 > i2)
-		//		//		{
-		//		//			SWAP(i1, i2);
-		//		//			SWAP(pp1, pp2);
-		//		//		}
-		//		//
-		//		//		//TRACE(i1, i2);
-		//		//
-		//		//		for (s32 d = i1; d < i2; d++)
-		//		//		{
-		//		//			real t = (real)(d - i1) / (real)(i2 - i1);
-		//		//			real dist = lerp(pp1.distance, pp2.distance, t);
-		//		//			intersection.depth_buffer[d] = MIN(dist, intersection.depth_buffer[d]);
-		//		//		}
-		//		//
-		//		//		//TRACE("dists: ");
-		//		//		//TRACE(pp1.distance);
-		//		//		//TRACE(pp1.distance);
-		//		//		//TRACE("\n");
-		//		//	}
-		//		//}
-		//		//
-		//		//TRACE("Intersection Dists:");
-		//		//for (s32 i = 0; i < intersection.depth_buffer.size(); i++)
-		//		//{
-		//		//	TRACE(intersection.depth_buffer[i]);
-		//		//}
-		//		//TRACE("\n");
-		//	}
-		//}
+		// TODO: add correct amount of points to score
 
 		_is_submitted = true;
-
-		//_score = 1.0f;
-		//
-		//for (s32 i = 0; i < _intersections.size(); i++)
-		//{
-		//	auto& fi = _intersections[i];
-		//	vector<real> tois;
-		//
-		//	real avg_toi = 0.0f;
-		//	s32 toi_count = 0;
-		//	
-		//	// calc variance from the lines to the intersection.
-		//	for (s32 j = 0; j < fi.intersections.size(); j++)
-		//	{
-		//		auto& intersection = fi.intersections[j];
-		//		auto& vertices = intersection.area.points();
-		//
-		//		vec2 avg_point(0);
-		//		s32 point_count = 0;
-		//
-		//		for (s32 k = 0; k < _canvas->lines().size(); k++)
-		//		{
-		//			auto& lines = _canvas->lines()[k];
-		//			for (s32 l = 0; l < lines.size(); l++)
-		//			{
-		//				auto& point = lines[l];
-		//
-		//				if (gjk::overlap(&point, 1, vertices.data(), vertices.size()))
-		//				{
-		//					real toi = time_of_intersection(point, intersection);
-		//					tois.push_back(toi);
-		//					avg_point += point;
-		//					point_count++;
-		//				}
-		//			}
-		//		}
-		//
-		//		if (point_count > 0)
-		//		{
-		//			avg_point /= point_count;
-		//			avg_toi += time_of_intersection(avg_point, intersection);
-		//			toi_count++;
-		//		}
-		//	}
-		//
-		//	if (toi_count <= 0)
-		//	{
-		//		_score = -1;
-		//		return;
-		//	}
-		//
-		//	avg_toi /= toi_count;
-		//
-		//	fi.average_toi = avg_toi; // TODO: remove
-		//
-		//	real mean = 0.0f;
-		//
-		//	for (s32 j = 0; j < tois.size(); j++)
-		//	{
-		//		mean += tois[j];
-		//	}
-		//
-		//	mean /= tois.size();
-		//
-		//	real variance = 0.0f;
-		//
-		//	for (s32 j = 0; j < tois.size(); j++)
-		//	{
-		//		real v = abs((tois[j] - mean) * (tois[j] - mean));
-		//		v *= _intersectionVarianceWeight;
-		//		variance += 1.0f + v;
-		//	}
-		//
-		//	variance /= tois.size();
-		//	_score /= variance;
-		//
-		//	// negate points from score if a segment of the avg intersection is missing lines.
-		//	for (s32 j = 0; j < fi.intersections.size(); j++)
-		//	{
-		//		real to_negate = 1.0f;
-		//		constexpr real to_negate_weight = 1.0f; // TODO: add weight, exponent, ect. struct members to all score tallying
-		//
-		//		auto& intersection = fi.intersections[j];
-		//		intersection.area_coverage.clear();
-		//		auto& vertices = intersection.area.points();
-		//
-		//		auto [p1, p2] = intersection_of_time(fi.average_toi, intersection);
-		//
-		//		if (p1 == p2)
-		//		{
-		//			continue;
-		//		}
-		//
-		//		for (s32 k = 0; k < _canvas->lines().size(); k++)
-		//		{
-		//			auto& lines = _canvas->lines()[k];
-		//			for (s32 l = 0; l < lines.size() - 1; l++)
-		//			{
-		//				auto& l1 = lines[l];
-		//				auto& l2 = lines[l + 1];
-		//
-		//				if (gjk::overlap(&l1, 2, vertices.data(), vertices.size()))
-		//				{
-		//					auto [pl1, t_max] = project_point_to_plane(l1, p1, p2 - p1);
-		//					auto [pl2, t_min] = project_point_to_plane(l2, p1, p2 - p1);
-		//
-		//					t_max = CLAMP(t_max, 0, 1);
-		//					t_min = CLAMP(t_min, 0, 1);
-		//
-		//					if (t_min > t_max)
-		//					{
-		//						SWAP(t_min, t_max);
-		//					}
-		//
-		//					IntersectionCoverageBound min_bound = { .t = t_min, .bound = INTERSECTION_COVERAGE_BOUND_MIN };
-		//					IntersectionCoverageBound max_bound = { .t = t_max, .bound = INTERSECTION_COVERAGE_BOUND_MAX };
-		//
-		//					intersection.area_coverage.insert(min_bound);
-		//					intersection.area_coverage.insert(max_bound);
-		//				}
-		//			}
-		//		}
-		//
-		//		s32 current_bound = 0;
-		//		real lower_t = 0.0f;
-		//		real upper_t = 0.0f;
-		//
-		//		for (auto k = intersection.area_coverage.begin(); k != intersection.area_coverage.end(); k++)
-		//		{
-		//			if (current_bound == 0)
-		//			{
-		//				upper_t = (*k).t;
-		//
-		//				if (upper_t > 0.0f)
-		//				{
-		//					vec2 t1 = p1 + (p2 - p1) * lower_t;
-		//					vec2 t2 = p1 + (p2 - p1) * upper_t;
-		//					to_negate += length(t2 - t1) * to_negate_weight;
-		//				}
-		//
-		//				lower_t = upper_t;
-		//			}
-		//			else
-		//			{
-		//				lower_t = (*k).t;
-		//			}
-		//
-		//			current_bound += (*k).bound;
-		//		}
-		//
-		//		if (current_bound == 0 && lower_t < 1.0f)
-		//		{
-		//			vec2 t1 = p1 + (p2 - p1) * lower_t;
-		//			vec2 t2 = p1 + (p2 - p1) * 1.0;
-		//			to_negate += length(t2 - t1) * to_negate_weight;
-		//		}
-		//
-		//		_score /= to_negate;
-		//	}
-		//}
-		//
-		//TRACE("score: ", _score);
-		//
-		//_is_submitted = true;
 	}
 
 	void FormIntersectionsParallelMode::reset()
@@ -747,16 +351,21 @@ namespace night
 			return;
 		}
 
+		if (_drawingUDF == nullptr)
+		{
+			ERROR(name(), "'s _canvas is nullptr!");
+			return;
+		}
+
 		_canvas->clear();
 		_drawingUDF->fill(0xFF);
+		_is_submitted = false;
 		
 		spawn_forms();
 	}
 
 	void FormIntersectionsParallelMode::spawn_forms()
 	{
-		_is_submitted = false;
-
 		// TODO: load forms from file, create editor.
 
 		// Spawn in the forms with variability and density in there positions.
@@ -814,9 +423,31 @@ namespace night
 			form1->depth(5.0f);
 		}
 
-		auto& form2 = _forms.emplace_back(create<Box>("Form #2", BoxParams{
+		//auto& form2 = _forms.emplace_back(create<Box>("Form #2", BoxParams{
+		//		.transform = mat4(1),
+		//		.extents = {1, 1, 1},
+		//		.color = _wireframeColor
+		//	}
+		//));
+		//
+		//if (form2 != nullptr)
+		//{
+		//	vec3 position = vec3(
+		//		-_params.area.x / 2.0f + _params.area.x * 0.5f + (random(_params.variation.x) - _params.variation.x / 2),
+		//		-_params.area.y / 2.0f + _params.area.y * 0.5f + (random(_params.variation.y) - _params.variation.y / 2),
+		//		0.0f
+		//	);
+		//
+		//	form2->translate(position);
+		//	form2->rotate({ 1.0f, 0.0f, 0.0f }, random(R_PI)); // TODO: make random vector function.
+		//	form2->rotate({ 0.0f, 1.0f, 0.0f }, random(R_PI));
+		//	form2->rotate({ 0.0f, 0.0f, 1.0f }, random(R_PI));
+		//	form2->depth(5.0f);
+		//}
+
+		auto& form2 = _forms.emplace_back(create<Sphere>("Form #2", SphereParams{
 				.transform = mat4(1),
-				.extents = {1, 1, 1},
+				.radius = 1,
 				.color = _wireframeColor
 			}
 		));
@@ -830,32 +461,7 @@ namespace night
 			);
 
 			form2->translate(position);
-			form2->rotate({ 1.0f, 0.0f, 0.0f }, random(R_PI)); // TODO: make random vector function.
-			form2->rotate({ 0.0f, 1.0f, 0.0f }, random(R_PI));
-			form2->rotate({ 0.0f, 0.0f, 1.0f }, random(R_PI));
 			form2->depth(5.0f);
-		}
-
-
-		// TODO: use slope to render all possible intersections.
-		for (s32 i = 0; i < 25; i++)
-		{
-			auto& current = _debug_intersections.emplace_back();
-			real t = (real)i / 10.0f;
-			vec3 a_offset = { 0.0f, 0.0f, lerp(-0.5f, 0.5f, t) };
-			vec3 b_offset = { 0.0f, 0.0f, lerp(0.5f, -0.5f, t) };
-
-			for (s32 j = 0; j < _forms.size(); j++)
-			{
-				for (s32 k = j + 1; k < _forms.size(); k++)
-				{
-					auto& a = _forms[j];
-					auto& b = _forms[k];
-
-					auto intersection = Intersection::intersect_test(a, a_offset, b, b_offset);
-					current.push_back(intersection);
-				}
-			}
 		}
 
 		// actual intersections
@@ -926,15 +532,77 @@ namespace night
 		return !(has_neg && has_pos);
 	}
 
-	FormIntersectionsParallelMode::FormIntersections FormIntersectionsParallelMode::intersect(ref<Box> form_a, ref<Box> form_b)
+	void draw_circle(vec3 point, vec3 normal, real radius)
+	{
+		constexpr s32 segments = 32;
+
+		vec3 right = { 1.0f, 0.0f, 0.0f };
+		vec4 perp_normal = vec4(normalize(cross(normal, right)), 1);
+
+		for (s32 i = 0; i < segments; i++)
+		{
+			real t1 = (real)i / (real)(segments - 1) * R_PI * 2;
+			real t2 = (real)(i + 1) / (real)(segments - 1) * R_PI * 2;
+
+			vec3 p1 = perp_normal;
+			p1 = glm::rotate(mat4(1), t1, normal) * vec4(p1, 1);
+
+			vec3 p2 = perp_normal;
+			p2 = glm::rotate(mat4(1), t2, normal) * vec4(p2, 1);
+
+			p1 *= radius;
+			p2 *= radius;
+			p1 += point;
+			p2 += point;
+
+			utility::renderer().draw_line(Renderer3D::project_point_to_view_plane(vec4(p1, 1)), Renderer3D::project_point_to_view_plane(vec4(p2, 1)), BLUE);
+		}
+	};
+
+	FormIntersectionsParallelMode::FormIntersections FormIntersectionsParallelMode::intersect(ref<IForm> form_a, ref<IForm> form_b)
 	{
 		FormIntersections result;
 
 		result.form_a = form_a;
 		result.form_b = form_b;
 
-		auto planes_a = form_a->planes();
-		auto planes_b = form_b->planes();
+		if (form_b->type() == EFormType::Sphere && form_a->type() == EFormType::Box)
+		{
+			// test sphere
+			TRACE("TEST SPEHER");
+			auto planes_a = ((ref<Box>)(form_a))->planes();
+			auto sphere = (ref<Sphere>)form_b;
+			vec4 sphere_origin = sphere->transform() * vec4(0, 0, 0, 1);
+			real sphere_radius = sphere->radius();
+
+			ProjectPointToPlaneResult3D projs[6];
+
+			for (s32 i = 0; i < planes_a.size(); i++)
+			{
+				auto& plane = planes_a[i];
+				auto projected = project_point_to_plane(vec3(sphere_origin), vec3(plane.vertices[0]), vec3(plane.normal));
+				projs[i] = projected;
+			}
+
+			_test_render = [=]()
+			{
+				for (s32 i = 0; i < planes_a.size(); i++)
+				{
+					utility::renderer().draw_point(Renderer3D::project_point_to_view_plane(vec4(projs[i].point, 1)), RED);
+					draw_circle(projs[i].point, planes_a[i].normal, sphere_radius); // reduce radius according to dist
+				}
+				
+			};
+
+			return result;
+		}
+		else if (form_a->type() != EFormType::Box || form_b->type() != EFormType::Box)
+		{
+			return result; // TODO: handle all form combos.
+		}
+
+		auto planes_a = ((ref<Box>)(form_a))->planes(); // TODO: figure out spheres.
+		auto planes_b = ((ref<Box>)(form_b))->planes();
 
 		for (s32 i = 0; i < planes_a.size(); i++)
 		{
@@ -1056,7 +724,6 @@ namespace night
 	{
 		vec2 p1 = Renderer3D::project_point_to_view_plane(vec4(intersection.origin, 1));
 		vec2 p2 = Renderer3D::project_point_to_view_plane(vec4(intersection.origin + intersection.normal, 1));
-		//vec2 n = normalize(Renderer3D::project_point_to_view_plane(vec4(intersection.normal, 1)));
 		vec2 n = normalize(p2 - p1);
 
 		vec2 proj = project_point_to_plane(point_on_overlapping_forms, p1, n).point;
@@ -1099,6 +766,64 @@ namespace night
 		return { vec2(0), vec2(0) };
 	}
 
+	void FormIntersectionsParallelMode::on_render()
+	{
+		auto time_elapsed = utility::window().time_elapsed();
+		//auto& current = _debug_intersections[s32(time_elapsed * 10) % _debug_intersections.size()];
+
+		if (_is_submitted)
+		{
+			for (s32 i = 0; i < _intersections.size(); i++)
+			{
+				auto& fi = _intersections[i];
+				for (s32 j = 0; j < fi.intersections.size(); j++)
+				{
+					auto& intersection = fi.intersections[j];
+
+					constexpr real range = 3.5f;
+					auto [p1, p2] = intersection_of_time((fmod(time_elapsed, range) - range / 2), intersection);
+
+					if (p1 != p2)
+					{
+						utility::renderer().draw_line(p1, p2, BLUE);
+					}
+
+					auto [ap1, ap2] = intersection_of_time(fi.approx_toi, intersection);
+
+					if (ap1 == ap2)
+					{
+						continue;
+					}
+
+					utility::renderer().draw_line(ap1, ap2, RED);
+				}
+			}
+		}
+
+		if (_test_render)
+		{
+			_test_render();
+		}
+
+		//for (s32 i = 0; i < _intersections.size(); i++)
+		//{
+		//	auto& form = _intersections[i];
+		//	for (s32 j = 0; j < form.intersections.size(); j++)
+		//	{
+		//		auto& intersection = form.intersections[j];
+		//		vec4 origin = Renderer3D::project_point_to_view_plane(vec4(intersection.origin, 1));
+		//		vec4 normal = Renderer3D::project_point_to_view_plane(vec4(intersection.normal, 1));
+		//		utility::renderer().draw_line(origin, origin + normal * 100.0, GREEN);
+		//		utility::renderer().draw_line(origin, origin - normal * 100.0, GREEN);
+		//		intersection.area.draw();
+		//
+		//		//constexpr real range = 2.5f;
+		//		//auto [p1, p2] = intersection_of_time((fmod(time_elapsed, range) - range / 2), intersection);
+		//		//utility::renderer().draw_line(p1, p2, PURPLE);
+		//	}
+		//}
+	}
+
 	void FormIntersectionsParallelMode::clear_forms()
 	{
 		for (s32 i = 0; i < _forms.size(); i++)
@@ -1112,7 +837,7 @@ namespace night
 		}
 
 		_forms.clear();
-		_debug_intersections.clear();
+		//_debug_intersections.clear();
 		_intersections.clear();
 		_instersectionsDebugView->fill(0x00);
 		_intersectionsOfTimeUDF->fill(0xFF); // TODO: may not need to fill iotudf on clear.

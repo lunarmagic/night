@@ -7,7 +7,7 @@
 namespace night
 {
 
-	struct Intersection;
+	//struct Intersection;
 
 	struct BoxParams
 	{
@@ -20,8 +20,6 @@ namespace night
 	{
 		Box(const BoxParams& params);
 
-		//virtual vector<Line> intersect(const IForm& other) override;
-
 		struct Plane
 		{
 			array<vec3, 4> vertices;
@@ -30,7 +28,7 @@ namespace night
 
 		array<Plane, 6> planes() const; // TODO: return ref to cached planes
 		// get the contour in global 3d space, winding order
-		vector<vec4> contour();
+		//vector<vec4> contour();
 
 		const array<vec4, 8>& points() const { return _points; }
 
@@ -41,7 +39,6 @@ namespace night
 	private:
 
 		array<vec4, 8> _points;
-		Color _color{ BLACK };
 		Color _farCornerColor{ WHITE * 0.95f }; // TODO: make line renderer that uses alpha
 	};
 }

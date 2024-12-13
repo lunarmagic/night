@@ -2,7 +2,9 @@
 
 #include "CameraGameMode.h"
 #include "ComputeShader/ComputeShader.h"
-#include "FormIntersectionsMode.h"
+#include "Drawing/Canvas.h"
+//#include "FormIntersectionsMode.h"
+#include "form/IForm.h"
 
 #define FORM_INTERSECTION_IOT_ACC 25
 
@@ -11,7 +13,7 @@ namespace night
 
 	struct FormIntersectionsParallelModeParams
 	{
-		EForm which_forms{ 0xFFFFFFFF };
+		EFormType which_forms{ 0xFFFFFFFF };
 		ivec2 density{ 2, 2 };
 		vec2 area{ 2, 2 };
 		vec2 variation{ 1.25f, 1.25f };
@@ -38,8 +40,8 @@ namespace night
 		void clear_forms();
 
 		FormIntersectionsParallelModeParams _params;
-		vector<ref<Box>> _forms;
-		vector<vector<Intersection>> _debug_intersections;
+		vector<ref<IForm>> _forms;
+		//vector<vector<Intersection>> _debug_intersections;
 
 #define INTERSECTION_COVERAGE_BOUND_MIN -1
 #define INTERSECTION_COVERAGE_BOUND_MAX 1
@@ -67,12 +69,12 @@ namespace night
 
 		struct FormIntersections
 		{
-			ref<Box> form_a;
-			ref<Box> form_b;
+			ref<IForm> form_a;
+			ref<IForm> form_b;
 
 			struct Intersection
 			{
-				s32 plane_a;
+				s32 plane_a; // TODO: may not need this
 				s32 plane_b;
 
 				Polygon area;
@@ -82,7 +84,7 @@ namespace night
 			};
 
 			vector<Intersection> intersections;
-			real average_toi{ INFINITY };
+			real approx_toi{ INFINITY };
 			real distance_to_pixels{ INFINITY };
 		};
 
@@ -91,7 +93,7 @@ namespace night
 		ref<ComputeShader> _drawingUDF;
 		ref<ComputeShader> _intersectionsOfTimeUDF;
 
-		FormIntersections intersect(ref<Box> form_a, ref<Box> form_b);
+		FormIntersections intersect(ref<IForm> form_a, ref<IForm> form_b);
 		real time_of_intersection(const vec2& point_on_overlapping_forms, const FormIntersections::Intersection& intersection);
 
 		// returns a line segment of the intersection clamped between the 2 planes
@@ -105,8 +107,8 @@ namespace night
 		real _score{ -1.0f };
 		u8 _is_submitted{ false };
 
-		real _intersectionVarianceWeight{ 2.5f };
-		real _intersectionVarianceExponent{ 1.0f };
+		//real _intersectionVarianceWeight{ 2.5f };
+		//real _intersectionVarianceExponent{ 1.0f };
 	};
 
 }
