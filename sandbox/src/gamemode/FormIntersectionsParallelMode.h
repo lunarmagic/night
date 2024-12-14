@@ -99,6 +99,9 @@ namespace night
 		// returns a line segment of the intersection clamped between the 2 planes
 		pair<vec2, vec2> intersection_of_time(real toi, const FormIntersections::Intersection& intersection);
 
+		// brute force
+		vector<pair<vec2, vec2>> intersection_of_time(real toi, const FormIntersections& intersection);
+
 		ref<Canvas> _canvas;
 
 		Color8 _wireframeColor{ WHITE / 2 };
